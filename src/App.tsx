@@ -35,7 +35,7 @@ import { cn } from './lib/utils';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid, PieChart, Pie } from 'recharts';
 import { translations, Language } from './locales';
 import { parseChatFile, ChatStats } from './lib/parser';
-import { generateLocalSynthesis } from './lib/analyzer';
+import { generateAISynthesis } from './lib/gemini';
 import { getPersona, PersonaInfo } from './lib/persona';
 
 // Types
@@ -713,10 +713,25 @@ function ComparisonCard({
 }
 
 function InsightsView({ t, stats, lang, analysisTarget, partnerGender }: { t: any, stats: ChatStats | null, lang: Language, analysisTarget: 'self' | 'partner', partnerGender: 'Man' | 'Women', key?: string }) {
-  if (!stats) return null;
+  const [synthesis, setSynthesis] = useState<string[]>([]);
+  const [aiLoading, setAiLoading] = useState(true);
 
-  const me = analysisTarget === 'self' ? stats.participants[0] : (stats.participants[1] || stats.participants[0]);
-  const partner = analysisTarget === 'self' ? (stats.participants[1] || "Partner") : stats.participants[0];
+  const me = stats ? (analysisTarget === 'self' ? stats.participants[0] : (stats.participants[1] || stats.participants[0])) : '';
+  const partner = stats ? (analysisTarget === 'self' ? (stats.participants[1] || "Partner") : stats.participants[0]) : '';
+
+  useEffect(() => {
+    if (!stats) return;
+    setAiLoading(true);
+    setSynthesis([]);
+    generateAISynthesis(stats, analysisTarget, lang)
+      .then(paragraphs => {
+        setSynthesis(paragraphs);
+        setAiLoading(false);
+      })
+      .catch(() => setAiLoading(false));
+  }, [stats, analysisTarget, lang]);
+
+  if (!stats) return null;
 
   const persona = partner ? getPersona(stats, partner as string, partnerGender) : null;
 
@@ -773,19 +788,44 @@ function InsightsView({ t, stats, lang, analysisTarget, partnerGender }: { t: an
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
         <div className="space-y-8">
           <div className="flex items-center gap-4 text-sepia">
-          <span className="text-2xl">✨</span>
-          <h3 className="text-3xl font-display underline decoration-sepia decoration-1 underline-offset-8">{t.insights.synthesisTitle}</h3>
+            <span className="text-2xl">✨</span>
+            <h3 className="text-3xl font-display underline decoration-sepia decoration-1 underline-offset-8">{t.insights.synthesisTitle}</h3>
+            {aiLoading && (
+              <span className="text-[10px] font-display font-bold text-gold uppercase tracking-widest animate-pulse ml-2">
+                {lang === 'tr' ? 'AI Yazıyor...' : 'AI Writing...'}
+              </span>
+            )}
           </div>
-          <div className="space-y-6 text-ink/80 text-lg leading-[1.8] font-serif italic">
-            {generateLocalSynthesis(stats, lang).map((para, i) => (
-              <p key={i}>{para}</p>
-            ))}
-          </div>
+
+          {aiLoading ? (
+            <div className="space-y-4 animate-pulse">
+              <div className="h-4 bg-sepia/10 rounded-full w-full" />
+              <div className="h-4 bg-sepia/10 rounded-full w-5/6" />
+              <div className="h-4 bg-sepia/10 rounded-full w-4/6" />
+              <div className="h-4 bg-sepia/10 rounded-full w-full mt-6" />
+              <div className="h-4 bg-sepia/10 rounded-full w-3/4" />
+              <div className="h-4 bg-sepia/10 rounded-full w-5/6" />
+              <div className="h-4 bg-sepia/10 rounded-full w-full mt-6" />
+              <div className="h-4 bg-sepia/10 rounded-full w-4/5" />
+            </div>
+          ) : (
+            <div className="space-y-6 text-ink/80 text-lg leading-[1.8] font-serif italic">
+              {synthesis.map((para, i) => (
+                <motion.p
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.15 }}
+                >{para}</motion.p>
+              ))}
+            </div>
+          )}
+
           <div className="pt-8 flex flex-col gap-3 relative z-10">
             <div className="w-full h-[1px] bg-sepia/10" />
             <div className="flex justify-between items-center">
               <span className="text-[9px] font-bold text-sepia/40 uppercase tracking-[0.3em] font-display">{t.insights.study}</span>
-              <span className="text-[9px] font-bold text-gold uppercase tracking-[0.3em] font-display">{t.insights.confidence}: 94%</span>
+              <span className="text-[9px] font-bold text-gold uppercase tracking-[0.3em] font-display">Gemini 2.0 Flash ✦</span>
             </div>
           </div>
         </div>
