@@ -97,7 +97,7 @@ export default function App() {
       <div className="flex-1 flex flex-col min-w-0">
         <Header setView={setView} currentView={view} t={t} darkMode={darkMode} setDarkMode={setDarkMode} />
         
-        <main className="max-w-4xl mx-auto px-6 py-12 pb-32">
+        <main className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12 pb-32">
           <AnimatePresence mode="wait">
             {view === 'welcome' && <WelcomeView key="welcome" onStart={() => {
               localStorage.setItem('readr-onboarded', 'true');
@@ -155,18 +155,18 @@ function Header({ setView, currentView, t, darkMode, setDarkMode }: { setView: (
     <header className="sticky top-0 z-50 bg-parchment/80 backdrop-blur-sm flex items-center justify-between px-6 py-6 md:py-8 border-b border-sepia/10">
       <div className="w-10"></div> 
       
-      <div className="flex items-center gap-3 cursor-pointer absolute left-1/2 -translate-x-1/2" onClick={() => setView(localStorage.getItem('readr-onboarded') === 'true' ? 'dashboard' : 'welcome')}>
+      <div className="flex items-center gap-2 md:gap-3 cursor-pointer" onClick={() => setView(localStorage.getItem('readr-onboarded') === 'true' ? 'dashboard' : 'welcome')}>
         {!isLanding && (
           <motion.img 
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             src="/logo.png" 
             alt="Readr Logo" 
-            className="w-10 h-10 object-contain mix-blend-multiply grayscale contrast-125" 
+            className="w-8 h-8 md:w-10 md:h-10 object-contain mix-blend-multiply grayscale contrast-125" 
           />
         )}
         <motion.h1 
-          className="text-5xl md:text-6xl font-display leading-none flex text-sepia"
+          className="text-3xl md:text-6xl font-display leading-none flex text-sepia"
           initial="hidden"
           animate="visible"
           variants={{
@@ -219,7 +219,7 @@ function DashboardView({ stats, t, setView, analysisTarget, partnerGender }: { s
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="space-y-12 py-4"
+      className="space-y-6 md:space-y-12 py-4"
     >
       <section className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div className="w-full">
@@ -238,20 +238,20 @@ function DashboardView({ stats, t, setView, analysisTarget, partnerGender }: { s
       {/* Mini Stats & Persona */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Persona Card */}
-        <div className="md:col-span-2 parchment-sheet border border-sepia/20 rounded-[2rem] p-8 shadow-xl relative overflow-hidden group">
+        <div className="md:col-span-2 parchment-sheet border border-sepia/20 rounded-[2rem] p-4 md:p-8 shadow-xl relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-40 h-40 bg-sepia/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-          <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
-            <div className="w-32 h-32 rounded-3xl overflow-hidden border border-sepia/20 bg-parchment shadow-lg rotate-2 hover:rotate-0 transition-all duration-500">
+          <div className="relative z-10 flex flex-row items-center gap-4 md:gap-8">
+            <div className="w-16 h-16 md:w-32 md:h-32 rounded-2xl md:rounded-3xl overflow-hidden border border-sepia/20 bg-parchment shadow-lg rotate-2 hover:rotate-0 transition-all duration-500 shrink-0">
               <img 
                 src={persona ? `/${persona.image}` : "/peer.png"} 
                 alt="Partner Persona" 
                 className="w-full h-full object-cover filter contrast-125 grayscale hover:grayscale-0 transition-all duration-700 mix-blend-multiply" 
               />
             </div>
-            <div className="flex-1 text-center md:text-left space-y-2">
-              <p className="text-[10px] font-display font-bold text-gold uppercase tracking-widest">{persona ? persona.type : t.dashboard.personaTitle}</p>
-              <h3 className="text-4xl font-display text-sepia">{partner || "Partner"}</h3>
-              <p className="text-sm text-ink/70 font-serif italic max-w-sm">
+            <div className="flex-1 text-left space-y-1 md:space-y-2 min-w-0">
+              <p className="text-[9px] md:text-[10px] font-display font-bold text-gold uppercase tracking-widest truncate">{persona ? persona.type : t.dashboard.personaTitle}</p>
+              <h3 className="text-2xl md:text-4xl font-display text-sepia leading-none truncate">{partner || "Partner"}</h3>
+              <p className="text-xs text-ink/70 font-serif italic line-clamp-2">
                 {persona ? persona.description[t.appName === "Readr" ? "en" : "tr"] : t.dashboard.personaDesc}
               </p>
             </div>
@@ -259,23 +259,23 @@ function DashboardView({ stats, t, setView, analysisTarget, partnerGender }: { s
         </div>
 
         {/* Mini Stats */}
-        <div className="grid grid-rows-2 gap-6">
-          <div className="parchment-sheet border border-sepia/20 rounded-[2rem] p-6 shadow-xl flex items-center gap-4 group">
-             <div className="w-12 h-12 bg-sepia/10 text-sepia rounded-2xl flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
+        <div className="grid grid-cols-2 md:grid-rows-2 md:grid-cols-1 gap-4 md:gap-6">
+          <div className="parchment-sheet border border-sepia/20 rounded-[1.5rem] md:rounded-[2rem] p-4 md:p-6 shadow-xl flex items-center gap-3 md:gap-4 group">
+             <div className="w-10 h-10 md:w-12 md:h-12 bg-sepia/10 text-sepia rounded-xl md:rounded-2xl flex items-center justify-center text-lg shrink-0 group-hover:scale-110 transition-transform">
                💬
              </div>
              <div>
-               <p className="text-[9px] font-bold text-sepia/60 uppercase tracking-widest">{t.dashboard.analyzedMessages}</p>
-               <p className="text-2xl font-display text-sepia mt-0.5">{stats ? stats.totalMessages : 0}</p>
+               <p className="text-[8px] md:text-[9px] font-bold text-sepia/60 uppercase tracking-widest">{t.dashboard.analyzedMessages}</p>
+               <p className="text-xl md:text-2xl font-display text-sepia mt-0.5">{stats ? stats.totalMessages : 0}</p>
              </div>
           </div>
-          <div className="parchment-sheet border border-sepia/20 rounded-[2rem] p-6 shadow-xl flex items-center gap-4 group">
-             <div className="w-12 h-12 bg-sepia/10 text-sepia rounded-2xl flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
+          <div className="parchment-sheet border border-sepia/20 rounded-[1.5rem] md:rounded-[2rem] p-4 md:p-6 shadow-xl flex items-center gap-3 md:gap-4 group">
+             <div className="w-10 h-10 md:w-12 md:h-12 bg-sepia/10 text-sepia rounded-xl md:rounded-2xl flex items-center justify-center text-lg shrink-0 group-hover:scale-110 transition-transform">
                😊
              </div>
              <div>
-               <p className="text-[9px] font-bold text-sepia/60 uppercase tracking-widest">{t.dashboard.favoriteEmoji}</p>
-               <p className="text-2xl font-display text-sepia mt-0.5">😂</p>
+               <p className="text-[8px] md:text-[9px] font-bold text-sepia/60 uppercase tracking-widest">{t.dashboard.favoriteEmoji}</p>
+               <p className="text-xl md:text-2xl font-display text-sepia mt-0.5">😂</p>
              </div>
           </div>
         </div>
@@ -290,22 +290,22 @@ function DashboardView({ stats, t, setView, analysisTarget, partnerGender }: { s
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="parchment-sheet border border-sepia/20 rounded-3xl p-8 shadow-xl group hover:bg-sepia/5 transition-colors flex justify-between items-center"
+              className="parchment-sheet border border-sepia/20 rounded-[2rem] p-5 md:p-8 shadow-xl group hover:bg-sepia/5 transition-colors flex justify-between items-center"
             >
-              <div className="flex items-center gap-6">
-                <div className={cn("w-16 h-16 rounded-full flex items-center justify-center text-2xl border border-sepia/20", chat.color)}>
+              <div className="flex items-center gap-4 md:gap-6">
+                <div className={cn("w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center text-xl md:text-2xl border border-sepia/20", chat.color)}>
                   {chat.emoji}
                 </div>
                 <div>
-                  <h4 className="text-2xl font-display text-sepia">{chat.name}</h4>
-                  <p className="text-[10px] font-bold text-sepia/40 uppercase tracking-widest mt-1">{t.dashboard.lastAnalyzed} {chat.date}</p>
+                  <h4 className="text-xl md:text-2xl font-display text-sepia">{chat.name}</h4>
+                  <p className="text-[9px] md:text-[10px] font-bold text-sepia/40 uppercase tracking-widest mt-1">{t.dashboard.lastAnalyzed} {chat.date}</p>
                 </div>
               </div>
               <button 
                 onClick={() => setView('insights')}
-                className="w-12 h-12 rounded-xl border border-sepia/20 flex items-center justify-center group-hover:bg-sepia group-hover:border-sepia group-hover:text-parchment transition-all shadow-sm group-hover:shadow-sepia/20 group-hover:scale-105"
+                className="w-10 h-10 md:w-12 md:h-12 rounded-xl border border-sepia/20 flex items-center justify-center group-hover:bg-sepia group-hover:border-sepia group-hover:text-parchment transition-all shadow-sm group-hover:shadow-sepia/20 group-hover:scale-105"
               >
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
               </button>
             </motion.div>
           ))}
@@ -656,13 +656,13 @@ function ComparisonCard({
       <div className="flex justify-between items-start">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="text-xl">{emoji}</span>
-            <p className="text-[10px] font-bold text-sepia/40 uppercase tracking-[0.2em] font-display">{title}</p>
+            <span className="text-lg md:text-xl">{emoji}</span>
+            <p className="text-[9px] md:text-[10px] font-bold text-sepia/40 uppercase tracking-[0.2em] font-display">{title}</p>
           </div>
-          <h5 className="text-2xl font-display text-sepia">{mePercent}% vs {partnerPercent}%</h5>
+          <h5 className="text-xl md:text-2xl font-display text-sepia">{mePercent}% vs {partnerPercent}%</h5>
         </div>
         <div className="text-right">
-           <p className="text-[10px] font-bold text-gold uppercase tracking-widest font-display">{meIsHigher ? "PROMINENT" : "RECEPTIVE"}</p>
+           <p className="text-[9px] md:text-[10px] font-bold text-gold uppercase tracking-widest font-display">{meIsHigher ? "PROMINENT" : "RECEPTIVE"}</p>
         </div>
       </div>
 
@@ -1056,9 +1056,16 @@ function Navigation({ setView, currentView, t }: { setView: (v: ViewState) => vo
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       
-      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+      // Always show at the very top
+      if (currentScrollY < 20) {
+        setIsVisible(true);
+      } 
+      // Hide when scrolling down
+      else if (currentScrollY > lastScrollY && currentScrollY > 100) {
         setIsVisible(false);
-      } else if (currentScrollY < lastScrollY) {
+      } 
+      // Show when scrolling up
+      else if (currentScrollY < lastScrollY) {
         setIsVisible(true);
       }
       
@@ -1071,38 +1078,49 @@ function Navigation({ setView, currentView, t }: { setView: (v: ViewState) => vo
 
   if (currentView === 'login' || currentView === 'welcome') return null;
 
-  const tabs = [
-    { id: 'dashboard', label: t.nav.home, emoji: '🏠' },
-    { id: 'upload', label: t.nav.analyze, emoji: '📂' },
-    { id: 'insights', label: t.nav.insights, emoji: '✨' },
-    { id: 'profile', label: t.nav.settings, emoji: '⚙️' },
+  const navItems = [
+    { id: 'dashboard', label: t.nav.home, icon: <Home className="w-5 h-5" /> },
+    { id: 'upload', label: t.nav.analyze, icon: <Upload className="w-5 h-5" /> },
+    { id: 'insights', label: t.nav.insights, icon: <Sparkles className="w-5 h-5" /> },
+    { id: 'profile', label: t.nav.settings, icon: <Settings className="w-5 h-5" /> },
   ];
 
   return (
-    <nav className={cn(
-      "fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-parchment/80 backdrop-blur-md border border-sepia/20 rounded-3xl flex justify-around items-center px-4 py-3 shadow-2xl transition-transform duration-300 w-[90%] max-w-lg",
-      isVisible ? "translate-y-0" : "translate-y-32"
-    )}>
-      {tabs.map(tab => {
-        const isActive = currentView === tab.id || (tab.id === 'upload' && currentView === 'processing');
-        return (
-          <button 
-            key={tab.id}
-            onClick={() => setView(tab.id as ViewState)}
-            className={cn(
-              "flex flex-col items-center justify-center px-4 py-2 transition-all active:scale-90 relative",
-              isActive ? "text-sepia font-bold" : "text-sepia/60 hover:text-sepia"
-            )}
-          >
-            {isActive && (
-              <motion.div layoutId="nav-pill" className="absolute inset-0 bg-sepia/10 -z-10 rounded-2xl" />
-            )}
-            <span className={cn("text-xl mb-0.5", isActive ? "" : "opacity-90")}>{tab.emoji}</span>
-            <span className="text-[8px] font-display font-bold uppercase tracking-[0.2em]">{tab.label}</span>
-          </button>
-        );
-      })}
-    </nav>
+    <motion.nav 
+      animate={{ y: isVisible ? 0 : 100, opacity: isVisible ? 1 : 0 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50"
+    >
+      <div className="bg-parchment/90 backdrop-blur-xl border border-sepia/20 rounded-[2rem] flex items-center shadow-2xl shadow-ink/20 p-1.5 gap-1">
+        {navItems.map(item => {
+          const isActive = currentView === item.id || (item.id === 'upload' && currentView === 'processing');
+          return (
+            <button
+              key={item.id}
+              onClick={() => setView(item.id as ViewState)}
+              className="relative flex flex-col items-center justify-center px-5 py-2.5 rounded-[1.5rem] transition-all active:scale-90 min-w-[64px]"
+            >
+              {isActive && (
+                <motion.div
+                  layoutId="nav-active"
+                  className="absolute inset-0 bg-sepia rounded-[1.5rem]"
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                />
+              )}
+              <span className={cn("relative z-10 transition-colors", isActive ? "text-parchment" : "text-sepia/50")}>
+                {item.icon}
+              </span>
+              <span className={cn(
+                "relative z-10 text-[9px] font-display font-bold uppercase tracking-widest mt-0.5 transition-colors",
+                isActive ? "text-parchment" : "text-sepia/40"
+              )}>
+                {item.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </motion.nav>
   );
 }
 
