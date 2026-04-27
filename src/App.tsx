@@ -29,7 +29,7 @@ import {
   MessageSquareDashed,
   Home
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'motion/react';
 import { cn } from './lib/utils';
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid, PieChart, Pie } from 'recharts';
@@ -308,6 +308,16 @@ function DashboardView({ setView, t, lang }: { setView: (v: ViewState) => void, 
 }
 
 function WelcomeView({ onStart, t }: { onStart: () => void, t: any, key?: string }) {
+  const x = useMotionValue(0);
+  const opacity = useTransform(x, [0, 150], [1, 0]);
+  const bgOpacity = useTransform(x, [0, 150], [0.1, 1]);
+
+  const handleDragEnd = (event: any, info: any) => {
+    if (info.offset.x > 180) {
+      onStart();
+    }
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -335,14 +345,32 @@ function WelcomeView({ onStart, t }: { onStart: () => void, t: any, key?: string
         </p>
       </div>
 
-      <div className="w-full max-w-xs pt-4">
-        <button 
-          onClick={onStart}
-          className="w-full py-5 px-8 bg-indigo-500 text-white rounded-2xl shadow-lg shadow-indigo-500/30 font-bold uppercase tracking-widest text-lg hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/40 active:scale-95 transition-all flex items-center justify-center gap-2"
-        >
-          {t.welcome.getStarted}
-          <ArrowRight className="w-5 h-5" />
-        </button>
+      <div className="w-full max-w-[300px] pt-4">
+        <div className="relative w-full h-[68px] bg-white dark:bg-zinc-800 rounded-full shadow-inner border border-ink/10 flex items-center overflow-hidden">
+          <motion.div 
+            className="absolute left-0 top-0 bottom-0 bg-indigo-500 rounded-full" 
+            style={{ width: useTransform(x, (val) => val + 64), opacity: bgOpacity }} 
+          />
+          
+          <motion.span 
+            className="absolute w-full text-center text-xs font-bold uppercase tracking-[0.2em] text-ink/40 pointer-events-none pl-12"
+            style={{ opacity }}
+          >
+            {t.welcome.getStarted}
+            <span className="inline-block ml-2 opacity-50 animate-pulse">&gt;&gt;&gt;</span>
+          </motion.span>
+          
+          <motion.div
+            drag="x"
+            dragConstraints={{ left: 0, right: 226 }}
+            dragElastic={0.05}
+            onDragEnd={handleDragEnd}
+            style={{ x }}
+            className="w-14 h-14 bg-indigo-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-indigo-500/50 cursor-grab active:cursor-grabbing z-10 ml-1.5"
+          >
+            <ArrowRight className="w-6 h-6" />
+          </motion.div>
+        </div>
       </div>
 
       <div className="flex items-center gap-3 px-6 py-4 rounded-2xl border border-ink/10 bg-white dark:bg-zinc-900 shadow-sm">
@@ -401,22 +429,22 @@ function LoginView({ onLogin, t }: { onLogin: () => void, t: any, key?: string }
         <p className="text-ink/70 max-w-[280px] mx-auto leading-relaxed">{t.login.subtitle}</p>
       </div>
 
-      <div className="bg-bg brutalist-border p-8 brutalist-shadow relative overflow-hidden">
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-accent"></div>
-        <div className="space-y-6">
+      <div className="bg-white dark:bg-zinc-900 border border-ink/10 rounded-3xl p-8 shadow-xl shadow-ink/5 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        <div className="space-y-6 relative z-10">
           <div className="grid grid-cols-1 gap-3">
             <button 
               onClick={onLogin}
-              className="flex items-center justify-center gap-3 w-full py-3 px-4 brutalist-border bg-white dark:bg-zinc-800 text-ink font-bold hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[4px_4px_0px_0px_var(--color-ink)] active:translate-x-0 active:translate-y-0 active:shadow-none transition-all"
+              className="flex items-center justify-center gap-3 w-full py-4 px-4 bg-white dark:bg-zinc-800 text-ink font-bold border border-ink/10 rounded-2xl hover:bg-ink/5 transition-all active:scale-[0.98]"
             >
               <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" alt="Google" className="w-5 h-5 object-contain" />
               <span>{t.login.google}</span>
             </button>
             <button 
               onClick={onLogin}
-              className="flex items-center justify-center gap-3 w-full py-3 px-4 bg-ink text-white font-bold hover:bg-accent transition-colors active:scale-[0.98]"
+              className="flex items-center justify-center gap-3 w-full py-4 px-4 bg-ink text-bg font-bold rounded-2xl hover:opacity-90 transition-opacity active:scale-[0.98]"
             >
-              <div className="w-5 h-5 bg-white dark:bg-zinc-200 rounded-full flex items-center justify-center">
+              <div className="w-5 h-5 bg-bg rounded-full flex items-center justify-center">
                  <span className="text-[10px] text-ink font-bold">A</span>
               </div>
               <span>{t.login.apple}</span>
@@ -424,16 +452,16 @@ function LoginView({ onLogin, t }: { onLogin: () => void, t: any, key?: string }
           </div>
 
           <div className="relative flex items-center py-2">
-            <div className="flex-grow border-t border-ink"></div>
-            <span className="flex-shrink mx-4 text-[10px] font-bold text-ink uppercase tracking-widest">{t.login.or}</span>
-            <div className="flex-grow border-t border-ink"></div>
+            <div className="flex-grow border-t border-ink/10"></div>
+            <span className="flex-shrink mx-4 text-[10px] font-bold text-ink/40 uppercase tracking-widest">{t.login.or}</span>
+            <div className="flex-grow border-t border-ink/10"></div>
           </div>
 
           <div className="space-y-4">
             <div className="space-y-1.5">
               <label className="block text-[10px] font-bold text-ink/60 px-1 uppercase tracking-widest" htmlFor="email">{t.login.emailLabel}</label>
               <input 
-                className="w-full px-4 py-3 bg-bg brutalist-border focus:ring-0 focus:border-accent rounded-none font-medium text-ink placeholder:text-ink/30 transition-all" 
+                className="w-full px-5 py-4 bg-white dark:bg-zinc-800 border border-ink/10 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 rounded-2xl font-medium text-ink placeholder:text-ink/30 transition-all outline-none" 
                 id="email" 
                 placeholder={t.login.emailPlaceholder} 
                 type="email"
@@ -441,7 +469,7 @@ function LoginView({ onLogin, t }: { onLogin: () => void, t: any, key?: string }
             </div>
             <button 
               onClick={onLogin}
-              className="w-full bg-accent text-white py-3.5 brutalist-border brutalist-shadow font-bold text-lg hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_var(--color-ink)] transition-all active:translate-y-0 active:shadow-none"
+              className="w-full bg-indigo-500 text-white py-4 rounded-2xl font-bold uppercase tracking-widest shadow-lg shadow-indigo-500/30 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/40 active:scale-95 transition-all"
             >
               {t.login.signIn}
             </button>
@@ -449,23 +477,26 @@ function LoginView({ onLogin, t }: { onLogin: () => void, t: any, key?: string }
         </div>
       </div>
 
-      <div className="bg-surface-container-low brutalist-border p-6 brutalist-shadow space-y-4">
+      <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-3xl p-6 shadow-sm space-y-4">
         <div className="flex items-start gap-4">
-          <div className="p-2 bg-accent/10 brutalist-border">
-            <Lock className="text-accent w-5 h-5" />
+          <div className="p-2.5 bg-indigo-500/10 text-indigo-500 rounded-xl">
+            <Lock className="w-5 h-5" />
           </div>
           <div className="space-y-1">
-            <h3 className="font-bold text-ink underline decoration-accent decoration-2 underline-offset-4">{t.login.securityTitle}</h3>
-            <p className="text-xs text-ink/70 leading-relaxed uppercase tracking-wide">{t.login.securityDesc}</p>
+            <h3 className="font-bold text-indigo-500">{t.login.securityTitle}</h3>
+            <p className="text-xs text-ink/70 leading-relaxed font-serif italic">{t.login.securityDesc}</p>
           </div>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2 pt-2">
           <div className="flex justify-between items-center px-0.5">
-            <span className="text-[10px] font-bold text-ink uppercase tracking-widest">{t.login.encryption}</span>
-            <span className="text-[10px] font-bold text-accent">{t.login.activeStatus}</span>
+            <span className="text-[10px] font-bold text-ink/40 uppercase tracking-widest">{t.login.encryption}</span>
+            <span className="text-[10px] font-bold text-green-500 uppercase tracking-widest flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+              {t.login.activeStatus}
+            </span>
           </div>
-          <div className="h-2 w-full brutalist-border bg-white dark:bg-zinc-800 overflow-hidden">
-            <div className="h-full bg-accent w-full"></div>
+          <div className="h-1.5 w-full bg-ink/5 rounded-full overflow-hidden">
+            <div className="h-full bg-green-500 w-full"></div>
           </div>
         </div>
       </div>
