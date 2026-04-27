@@ -139,7 +139,7 @@ export default function App() {
           </AnimatePresence>
         </main>
 
-        <Navigation setView={setView} currentView={view} t={t} darkMode={darkMode} setDarkMode={setDarkMode} />
+        <Navigation setView={setView} currentView={view} t={t} />
       </div>
     </div>
   );
@@ -202,7 +202,7 @@ function Header({ setView, currentView, t, darkMode, setDarkMode }: { setView: (
   );
 }
 
-function DashboardView({ stats, t, setView, analysisTarget, partnerGender }: { stats: ChatStats | null, t: any, setView: (v: ViewState) => void, analysisTarget: 'self' | 'partner', partnerGender: 'Man' | 'Women' }) {
+function DashboardView({ stats, t, setView, analysisTarget, partnerGender }: { stats: ChatStats | null, t: any, setView: (v: ViewState) => void, analysisTarget: 'self' | 'partner', partnerGender: 'Man' | 'Women', key?: string }) {
   const me = analysisTarget === 'self' ? stats?.participants[0] : (stats?.participants[1] || stats?.participants[0]);
   const partner = analysisTarget === 'self' ? (stats?.participants[1] || "Partner") : stats?.participants[0];
 
