@@ -1,237 +1,181 @@
-# WhatsApp Mesaj Analiz Uygulaması — Proje Dokümanı
+# Insightful — WhatsApp Mesaj Analiz Uygulaması
 
-> Bu doküman, geliştirme sürecine başlamadan önce yapılan fikir ve mimari tartışmasının özetidir.
+> Son güncelleme: Nisan 2026 · Platform: Web (React + Vite + Tailwind v4)
 
 ---
 
 ## 1. Vizyon
 
-İnsanları daha iyi tanımanın en doğal yollarından biri mesajlaşma örüntülerini anlamaktır. Bu uygulama, WhatsApp'tan dışa aktarılan `.txt` dosyalarını okuyarak kişi veya ilişki dinamiği hakkında anlamlı, okunabilir bir analiz üretir.
+İnsanları daha iyi tanımanın en doğal yollarından biri mesajlaşma örüntülerini anlamaktır.  
+Bu uygulama, WhatsApp'tan dışa aktarılan `.txt` dosyalarını okuyarak karşı taraf hakkında anlamlı, okunabilir bir analiz üretir.
 
-**Ana felsefe:** Etiketlemek değil, örüntü göstermek. "Bu kişi narsist" demek yerine "bu kişi mesajlarında şu örüntüleri gösteriyor" demek.
-
----
-
-## 2. Hedef Kitle
-
-- Her yaştan kullanıcı
-- Hem kendi mesajlarını hem de karşı tarafın mesajlarını analiz etmek isteyenler
-- İlişki dinamiklerini anlamak isteyenler
+**Ana felsefe:** Etiketlemek değil, örüntü göstermek.  
+"Bu kişi narsist" demek yerine → "Bu kişi mesajlarında şu örüntüleri gösteriyor."
 
 ---
 
-## 3. Platform Kararı
+## 2. Mevcut Durum (Nisan 2026)
 
-**React Native (iOS + Android)**
+### ✅ Tamamlananlar
 
-| Neden React Native? | Açıklama |
+| Özellik | Durum | Notlar |
+|---|---|---|
+| **Parşömen Teması** | ✅ Bitti | Cinzel + EB Garamond, sepia/gold/parchment palette |
+| **Karanlık Mod** | ✅ Bitti | Dark Academia estetiği, CSS vars ile otomatik renk değişimi |
+| **WhatsApp Parser** | ✅ Bitti | iOS + Android format desteği (regex bazlı) |
+| **Metrik Motoru** | ✅ Bitti | Yanıt süresi, kelime sayısı, emoji, aktif saatler, double texting |
+| **Persona Algoritması** | ✅ Bitti | 5 karakter tipi × 2 cinsiyet = 10 karakter görseli otomatik eşleşme |
+| **Insights View** | ✅ Bitti | Doğal dil yorumu, karşılaştırma kartları, saatlik aktivite grafiği |
+| **Dashboard** | ✅ Bitti | Persona kartı, son analizler, mini istatistikler |
+| **Dosya Yükleme** | ✅ Bitti | .txt dosya seçimi, self/partner modu, cinsiyet seçimi |
+| **İşleme Ekranı** | ✅ Bitti | Progress animasyonu (dairesel SVG) |
+| **Alt Navigasyon** | ✅ Bitti | Lucide ikonlar, spring animasyon, scroll'da gizlenme |
+| **EN/TR Dil Desteği** | ✅ Bitti | locales.ts ile merkezi çeviri sistemi |
+| **Mobil Uyumluluk** | ✅ Bitti | Responsive font boyutları, kompakt kartlar, mobile-first layout |
+| **Fiyatlandırma Sayfası** | ✅ Bitti | Ücretsiz / Pro / Unlimited planlar |
+| **Profil Sayfası** | ✅ Bitti | Dil değiştirme, dark mode toggle |
+
+---
+
+## 3. Eksikler ve Yapılacaklar
+
+### 🔴 Kritik (MVP için şart)
+
+| Eksik | Açıklama |
 |---|---|
-| Cross-platform | Tek kod tabanı, iki platform |
-| JavaScript ekosistemi | Geniş kütüphane desteği, AI araçlarıyla kolay entegrasyon |
-| Düşük sürtünme | WhatsApp zaten telefonda, export direkt oradan |
-| AI destekli geliştirme | JS tabanlı olduğu için yapay zeka araçlarıyla üretilen kod daha tutarlı |
-| Mac uyumu | iOS simülatörü ve App Store çıkışı Mac'te sorunsuz |
+| **Gerçek AI yorumu yok** | Şu an `generateLocalSynthesis()` — hardcoded şablonlarla çalışıyor. Claude/OpenAI API bağlantısı yok. |
+| **Login/Auth yok** | Google/Apple ile giriş sadece UI, arkasında gerçek auth yok |
+| **Dosya parse hatası yönetimi** | Yanlış formatlı dosya yüklenince kullanıcıya net hata mesajı verilmiyor |
+| **Demo data** | "Demo Analiz" butonu kaldırıldı ama gerçek bir demo akışı da yok |
 
-**Geliştirme Ortamı:** Mac bilgisayar üzerinde AI destekli editör
+### 🟡 Önemli (Kullanıcı deneyimi)
+
+| Eksik | Açıklama |
+|---|---|
+| **Paylaş özelliği** | "Paylaş" butonu var ama işlevsiz. Story/screenshot paylaşımı çalışmıyor |
+| **Favorit emoji gösterimi** | Dashboard'da emoji her zaman 😂 sabit, gerçek veriden gelmiyor |
+| **Son analizler listesi** | Dashboard'daki son analizler hardcoded (Julianne Moore, Zuckerberg...) |
+| **Profil verileri** | Profil sayfasında kullanıcıya ait gerçek veri yok |
+| **Persona açıklama dili** | `t.appName === "Readr"` kontrolü kırık — dil tespiti düzeltilmeli |
+| **İşleme ekranı adımları** | Sadece % göstergesi var, "hangi adım işleniyor" bilgisi yok |
+
+### 🟢 İyileştirmeler (Sonraki iterasyon)
+
+| Özellik | Açıklama |
+|---|---|
+| **Kelime bulutu** | Karşı tarafın en çok kullandığı kelimeler (stopword filtreli) |
+| **Zaman çizelgesi** | "İlk 3 ay vs son 3 ay" karşılaştırması |
+| **Emoji analizi detayı** | Top 5 emoji + kullanım sıklığı |
+| **Gün bazlı aktivite** | Saatlik grafik yanına haftanın günleri grafiği |
+| **Onboarding akışı** | İlk açılışta kısa bir "nasıl kullanılır" turu |
+| **Haptic feedback** | Mobil için dokunma geri bildirimi (native API) |
+| **Animasyonlu persona reveal** | Analiz tamamlanınca karakter dramatic şekilde ortaya çıksın |
 
 ---
 
-## 4. Mimari
+## 4. Çıkarılacaklar (Kaldırılması Gereken)
 
-### Hibrit Güvenlik Mimarisi
+| Öğe | Neden |
+|---|---|
+| **Login akışı (şimdilik)** | Auth yokken login ekranı kullanıcıyı yanıltıyor, doğrudan upload'a götür |
+| **Pricing sayfası (MVP için)** | Ödeme altyapısı yokken fiyat sayfası göstermek erken — geliştirme sürecinde gizli tutulabilir |
+| `t.appName === "Readr"` kontrolü | Uygulama adı artık "Insightful" — bu eski referans temizlenmeli |
+| **Hardcoded demo isimler** | Julianne Moore, Zuckerberg — bunları ya gerçek veriyle doldur ya da tamamen kaldır |
+
+---
+
+## 5. Teknik Mimari (Mevcut)
 
 ```
 Kullanıcı .txt dosyasını seçer
         ↓
-Telefonda parse + metrik çıkarımı (yerel kod)
+Tarayıcıda parse + metrik çıkarımı (parseChatFile)
         ↓
-Ham mesajlar telefondan otomatik silindi ✓
+Persona algoritması çalışır (getPersona) → karakter seçilir
         ↓
-Sadece anonim metrikler API'ye gönderilir
+generateLocalSynthesis() → template-based yorum metni
         ↓
-LLM yorum üretir
-        ↓
-Sonuç ekrana gelir — yalnızca analiz sonucu saklanır
+Dashboard + Insights ekranı
 ```
 
-### Güvenlik Prensipleri
+### Hedef Mimari (AI entegrasyonu sonrası)
 
-- Ham mesajlar **hiçbir zaman** sunucuya gönderilmez
-- Analiz tamamlandıktan sonra mesajlar cihazdan otomatik silinir
-- Kullanıcıya silme işlemi **gerçek zamanlı** gösterilir (şeffaflık)
-- Sunucuya yalnızca türetilmiş, anonim metrikler gider
+```
+Kullanıcı .txt dosyasını seçer
+        ↓
+Tarayıcıda parse + metrik çıkarımı (hiçbir ham mesaj çıkmaz)
+        ↓
+Sadece anonim metrikler → backend proxy
+        ↓
+Claude/GPT API → doğal dil yorumu
+        ↓
+Persona algoritması → karakter seçilir
+        ↓
+Dashboard + Insights ekranı
+```
 
 ---
 
-## 5. Teknik Katmanlar
+## 6. Sonraki Adımlar (Öncelik Sırası)
 
-### 5.1 Parse Katmanı (Yerel)
+1. **`generateLocalSynthesis()`'i gerçek AI ile değiştir**
+   - Backend proxy kur (Node.js / Vercel Edge Function)
+   - API key güvenliği: asla frontend'e gömme
+   - Claude veya OpenAI API bağla
 
-WhatsApp export formatı standarttır ve parse edilmesi kolaydır:
+2. **Parse hata yönetimi ekle**
+   - Boş dosya, yanlış format, tek katılımcı gibi edge case'ler
 
-```
-[23.01.2024, 14:32:05] Ahmet: Naber ya nasılsın
-[23.01.2024, 14:33:12] Ayşe: İyiyim sen?
-```
+3. **Gerçek demo akışı yaz**
+   - Örnek bir `.txt` dosyası hardcode et, "Demo Gör" butonu onu yüklesin
 
-Regex ile şunlar çıkarılır:
-- Tarih ve saat
-- Kişi adı
-- Mesaj içeriği
+4. **Paylaşım özelliği**
+   - `html2canvas` veya `dom-to-image` ile persona kartını image olarak kaydet
 
-### 5.2 Metrik Çıkarım Katmanı (Yerel, kod ile)
+5. **Dil tespiti düzelt**
+   - `lang === 'tr'` kontrolü tutarlı şekilde kullanılsın
 
-| Metrik | Açıklama |
+---
+
+## 7. Monetizasyon (Planlanan)
+
+| Plan | Fiyat | Mesaj Limiti |
+|---|---|---|
+| **Ücretsiz** | 0₺ | 200 mesaja kadar |
+| **Pro** | 158₺ / ay | 2.000 mesaja kadar |
+| **Unlimited** | 298₺ / ay | Sınırsız |
+
+> App Store / Play Store in-app purchase — harici ödeme yok.
+
+---
+
+## 8. Teknik Stack
+
+| Katman | Teknoloji |
 |---|---|
-| Yanıt süresi | Mesajlar arası geçen ortalama süre |
-| Mesaj uzunluğu | Ortalama karakter / kelime sayısı |
-| Emoji yoğunluğu | Emoji kullanım oranı |
-| Aktif saatler | Hangi saatlerde mesaj atılıyor |
-| Soru sorma oranı | Her kaç mesajda bir soru var |
-| Konuşma başlatma | Kim daha çok başlatıyor |
-| Konuşma bitirme | Kim son mesajı bırakıyor |
-| Mesaj dağılımı | Kim daha çok yazıyor |
-
-### 5.3 Yorum Katmanı (LLM — API)
-
-Sunucuya **yalnızca metrikler** gider, ham mesaj içeriği asla gitmez.
-
-LLM bu metrikleri alır ve doğal dilde yorum üretir.
+| UI Framework | React + Vite |
+| Stil | Tailwind CSS v4 |
+| Animasyon | Framer Motion (motion/react) |
+| Grafikler | Recharts |
+| İkonlar | Lucide React |
+| Font | Cinzel (başlık) + EB Garamond (gövde) |
+| Parser | Vanilla JS (regex) |
+| AI (hedef) | Claude API veya OpenAI via backend proxy |
 
 ---
 
-## 6. Kullanıcı Akışı (UX)
+## 9. Persona Karakterleri
 
-```
-Açılış Ekranı
-     ↓
-Dosya Seç (.txt)
-     ↓
-İşleniyor... (progress göstergesi + "mesajlar silindi" bildirimi)
-     ↓
-Analiz Sonucu
-```
+5 karakter tipi, 2 cinsiyet = **10 karakter görseli**
 
-### Sonuç Ekranı Yapısı
-
-**1. Doğal dil yorumu** (3-5 paragraf)
-Sanki bir arkadaşın o kişinin mesajlarını okuyup sana anlattığı gibi. Skor yok, yüzde yok, etiket yok.
-
-**2. Öne çıkan örüntü kartları**
-
-```
-🌙 Gece kuşu       → Mesajlarının %70'i gece
-⚡ Hızlı yanıtçı   → Ortalama yanıt süresi 4 dk
-❓ Soru soran      → Her 3 mesajda 1 soru
-💬 Söz hakkı       → Konuşmanın %60'ını o yönetiyor
-```
+| Karakter | Tanım | Tetikleyen Metrikler |
+|---|---|---|
+| **Logical Analyst** | Az emoji, uzun mesajlar | wordsPerMsg > 12, emojisPerMsg < 0.3 |
+| **Energetic Extravert** | Bol emoji, hızlı yanıt | emojisPerMsg > 1.2 veya responseTime < 10 |
+| **Empathetic Nurturer** | Dengeli, destekleyici | Default (diğerleri eşleşmezse) |
+| **Dreamy Visionary** | Gece aktif, uzun mesajlar | nightRatio > 0.3 veya wordsPerMsg > 20 |
+| **Cautious Skeptic** | Az mesaj, yavaş yanıt | messages < %20 veya responseTime > 30 |
 
 ---
 
-## 7. MVP Kapsamı
-
-### ✅ MVP'de olan
-- Tek dosya yükleme ve analiz
-- İki taraf için ayrı analiz (A kişisi / B kişisi)
-- Doğal dil yorum
-- Örüntü kartları
-- Otomatik mesaj silme + şeffaf bildirim
-
-### ❌ MVP'de olmayan (sonraki versiyonlar)
-- Zaman içinde takip ("3 ay önce vs şimdi")
-- Birden fazla konuşma karşılaştırma
-- Grafik ve görsel istatistikler
-- Hesap / profil sistemi
-
----
-
-## 8. Monetizasyon ve Ödeme Planı
-
-### Model: Freemium + Mesaj Limitli Abonelik
-
-Fiyatlandırma mesaj sayısına göre yapılandırılmıştır. Uzun konuşma = daha fazla LLM token = daha yüksek maliyet. Bu model hem kullanıcı için adil hem de sürdürülebilir.
-
-| Plan | Fiyat | Mesaj Limiti | Kapsam |
-|---|---|---|---|
-| **Ücretsiz** | 0₺ | 200 mesaja kadar | Temel analiz |
-| **Pro** | 158₺ / ay | 2.000 mesaja kadar | Derin analiz + geçmiş |
-| **Unlimited** | 298₺ / ay | Sınırsız | Her şey + öncelikli işlem |
-
-### Kullanıcı Edinme Stratejisi
-
-Kayıt zorunlu olmakla birlikte değer önce gösterilir, sonra kayıt istenir:
-
-```
-Dosyayı yükle → Analizi GÖR (önce değeri hissettir)
-        ↓
-Sonucu okumak için kayıt ol
-```
-
-### Önemli Notlar
-
-- Yıllık plan ilerleyen versiyonlarda eklenebilir, şimdilik aylık yeterli
-- App Store ve Play Store kendi ödeme altyapısını kullanır (in-app purchase), harici ödeme sistemi gerekmez
-- Ücretsiz limit kasıtlı olarak düşük tutulmuştur, kullanıcı değeri görür ama yetersiz hisseder
-
----
-
-## 9. Açık Sorular
-
-Geliştirmeye başlamadan önce netleştirilmesi gerekenler:
-
-1. **LLM seçimi:** Claude API mi, OpenAI mi, başka bir şey mi?
-2. **Backend var mı?** Sadece API proxy yeterli mi, yoksa bir sunucu gerekiyor mu?
-3. **App Store / Play Store** için geliştirici hesapları açıldı mı?
-
----
-
-## 10. Yapay Zeka Entegrasyonu
-
-### Akış
-
-```
-Metrikler → Prompt oluştur → Claude API → Yorum metni → Ekran
-```
-
-### Prompt Yapısı
-
-Ham mesajlar asla API'ye gönderilmez. Yalnızca çıkarılmış metrikler prompt'a eklenir:
-
-```
-Aşağıdaki mesajlaşma metriklerine göre bu kişiyi yorumla:
-
-- Ortalama yanıt süresi: 4 dakika
-- Mesajların %70'i 22:00-02:00 arası
-- Her 3 mesajda 1 soru soruyor
-- Konuşmaların %65'ini kendisi başlatıyor
-- Ortalama mesaj uzunluğu: 12 kelime
-
-Yorum tarzı: Doğal, arkadaşça, etiket kullanma.
-```
-
-### API Key Güvenliği
-
-API key asla uygulama içine gömülmez. Basit bir backend proxy kullanılır:
-
-| Seçenek | Durum |
-|---|---|
-| Key'i uygulamaya gömmek | ❌ Tehlikeli, kesinlikle yapma |
-| Kendi backend proxy'in | ✅ Doğru yöntem |
-
-Backend sadece bir proxy görevi görür, karmaşık değildir. Node.js ile birkaç satır kod yeterlidir.
-
----
-
-## 11. Sonraki Adım
-
-Doküman hazır, mimari netleşti. Sıradaki adım:
-
-1. React Native proje iskeletini kurmak (`npx react-native init`)
-2. Parse katmanını yazmak ve test etmek
-3. UI tasarımına başlamak
-4. Backend proxy kurmak
-5. Claude API entegrasyonunu eklemek
-
----
-
-*Bu doküman Claude ile yapılan ön tasarım görüşmesi sonucunda oluşturulmuştur.*
+*Bu doküman, Nisan 2026 geliştirme sürecini yansıtmaktadır.*
