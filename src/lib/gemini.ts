@@ -3,11 +3,22 @@ import { ChatStats } from './parser';
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
+// Simple cache to avoid re-calling API for the same analysis
+const cache = new Map<string, string[]>();
+
+function buildCacheKey(stats: ChatStats, analysisTarget: string, lang: string) {
+  return `${stats.totalMessages}-${analysisTarget}-${lang}-${stats.participants.join(',')}`;
+}
+
 export async function generateAISynthesis(
   stats: ChatStats,
   analysisTarget: 'self' | 'partner',
-  lang: 'tr' | 'en'
+  lang: 'tr' | 'en',
+  signal?: AbortSignal
 ): Promise<string[]> {
+  const cacheKey = buildCacheKey(stats, analysisTarget, lang);
+  if (cache.has(cacheKey)) return cache.get(cacheKey)!;
+
   const me = analysisTarget === 'self' ? stats.participants[0] : (stats.participants[1] || stats.participants[0]);
   const partner = analysisTarget === 'self' ? (stats.participants[1] || 'Partner') : stats.participants[0];
 
@@ -25,7 +36,6 @@ export async function generateAISynthesis(
   const meWordsPerMsg = meMessages > 0 ? Math.round(meWords / meMessages) : 0;
   const partnerWordsPerMsg = partnerMessages > 0 ? Math.round(partnerWords / partnerMessages) : 0;
 
-  // Find peak hour
   const peakHour = Object.entries(stats.hourlyActivity)
     .sort((a, b) => b[1] - a[1])[0]?.[0] || '?';
 
@@ -37,7 +47,6 @@ export async function generateAISynthesis(
     (stats.hourlyActivity[2] || 0)
   );
   const nightPercent = Math.round((nightActivity / stats.totalMessages) * 100);
-
   const messageSharePartner = Math.round((partnerMessages / stats.totalMessages) * 100);
 
   const metrics = `
@@ -91,6 +100,7 @@ Rules:
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      signal,
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
@@ -107,17 +117,19 @@ Rules:
     const data = await response.json();
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-    // Split into paragraphs
     const paragraphs = text
       .split(/\n\n+/)
       .map((p: string) => p.trim())
       .filter((p: string) => p.length > 0);
 
-    return paragraphs.length > 0 ? paragraphs : [text];
-  } catch (error) {
+    const result = paragraphs.length > 0 ? paragraphs : [text];
+    cache.set(cacheKey, result);
+    return result;
+  } catch (error: any) {
+    if (error?.name === 'AbortError') throw error; // Let AbortError propagate
     console.error('Gemini API error:', error);
-    // Fallback to local synthesis
     const { generateLocalSynthesis } = await import('./analyzer');
     return generateLocalSynthesis(stats, lang);
   }
 }
+

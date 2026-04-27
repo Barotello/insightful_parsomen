@@ -720,15 +720,18 @@ function InsightsView({ t, stats, lang, analysisTarget, partnerGender }: { t: an
   const partner = stats ? (analysisTarget === 'self' ? (stats.participants[1] || "Partner") : stats.participants[0]) : '';
 
   useEffect(() => {
-    if (!stats) return;
+    const controller = new AbortController();
     setAiLoading(true);
     setSynthesis([]);
-    generateAISynthesis(stats, analysisTarget, lang)
+    generateAISynthesis(stats, analysisTarget, lang, controller.signal)
       .then(paragraphs => {
         setSynthesis(paragraphs);
         setAiLoading(false);
       })
-      .catch(() => setAiLoading(false));
+      .catch(err => {
+        if (err?.name !== 'AbortError') setAiLoading(false);
+      });
+    return () => controller.abort();
   }, [stats, analysisTarget, lang]);
 
   if (!stats) return null;
