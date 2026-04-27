@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@400;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Crimson Pro", Georgia, serif;
+  --font-sans: "Inter", "Helvetica Neue", Arial, sans-serif;
+
+  /* Light mode */
+  --color-ink: #121212;
+  --color-bg: #F0EEE9;
+  --color-accent: #D94A38;
+  
+  --color-primary: #121212;
+  --color-primary-container: #121212;
+  --color-secondary: #D94A38;
+  --color-secondary-container: #D94A38;
+  --color-background: #F0EEE9;
+  --color-surface: #F0EEE9;
+  --color-surface-container: #e6e4de;
+  --color-surface-container-low: #ebe9e3;
+  --color-surface-container-highest: #d9d7d1;
+  --color-on-surface-variant: #404040;
+  --color-outline: #121212;
+  --color-outline-variant: #121212;
+  --color-error: #D94A38;
+  --color-card: #ffffff;
+  --color-card-alt: #ffffff;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Dark mode overrides */
+.dark {
+  --color-ink: #F0EEE9;
+  --color-bg: #0f0f0f;
+  --color-accent: #e85d4a;
+
+  --color-primary: #F0EEE9;
+  --color-primary-container: #F0EEE9;
+  --color-secondary: #e85d4a;
+  --color-secondary-container: #e85d4a;
+  --color-background: #0f0f0f;
+  --color-surface: #0f0f0f;
+  --color-surface-container: #1a1a1a;
+  --color-surface-container-low: #161616;
+  --color-surface-container-highest: #252525;
+  --color-on-surface-variant: #c0bdb8;
+  --color-outline: #F0EEE9;
+  --color-outline-variant: #F0EEE9;
+  --color-error: #e85d4a;
+  --color-card: #18181b;
+  --color-card-alt: #27272a;
+}
+
+@layer base {
+  body {
+    @apply bg-bg text-ink font-sans selection:bg-accent/20 transition-colors duration-300;
+  }
+  
+  h1, h2, .font-serif {
+    @apply font-serif italic;
+  }
+}
+
+.custom-shadow {
+  box-shadow: 4px 4px 0px 0px var(--color-ink);
+}
+
+.bento-card-shadow {
+  box-shadow: 4px 4px 0px 0px var(--color-ink);
+}
+
+.brutalist-border {
+  border: 1px solid var(--color-ink);
+}
+
+.brutalist-shadow {
+  box-shadow: 4px 4px 0px 0px var(--color-ink);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-ink;
+}
