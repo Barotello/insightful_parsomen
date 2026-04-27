@@ -36,6 +36,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Cartes
 import { translations, Language } from './locales';
 import { parseChatFile, ChatStats } from './lib/parser';
 import { generateLocalSynthesis } from './lib/analyzer';
+import { getPersona, PersonaInfo } from './lib/persona';
 
 // Types
 type ViewState = 'welcome' | 'login' | 'upload' | 'processing' | 'insights' | 'profile' | 'dashboard' | 'pricing';
@@ -55,6 +56,7 @@ export default function App() {
   });
   const [currentStats, setCurrentStats] = useState<ChatStats | null>(null);
   const [analysisTarget, setAnalysisTarget] = useState<'self' | 'partner'>('self');
+  const [partnerGender, setPartnerGender] = useState<'Man' | 'Women'>('Man');
 
   const t = translations[lang];
 
@@ -101,14 +103,37 @@ export default function App() {
               localStorage.setItem('readr-onboarded', 'true');
               setView('login');
             }} t={t} />}
-            {view === 'dashboard' && <DashboardView key="dashboard" setView={setView} t={t} lang={lang} />}
+            {view === 'dashboard' && <DashboardView 
+              key="dashboard" 
+              stats={currentStats} 
+              t={t} 
+              setView={setView} 
+              analysisTarget={analysisTarget}
+              partnerGender={partnerGender}
+            />}
             {view === 'login' && <LoginView key="login" onLogin={() => setView('upload')} t={t} />}
-            {view === 'upload' && <UploadView key="upload" onUpload={(stats) => {
-              setCurrentStats(stats);
-              setView('processing');
-            }} t={t} analysisTarget={analysisTarget} setAnalysisTarget={setAnalysisTarget} lang={lang} />}
+            {view === 'upload' && <UploadView 
+              key="upload" 
+              lang={lang} 
+              analysisTarget={analysisTarget} 
+              setAnalysisTarget={setAnalysisTarget} 
+              partnerGender={partnerGender}
+              setPartnerGender={setPartnerGender}
+              onUpload={(stats) => {
+                setCurrentStats(stats);
+                setView('processing');
+              }} 
+              t={t} 
+            />}
             {view === 'processing' && <ProcessingView key="processing" progress={processingProgress} t={t} />}
-            {view === 'insights' && currentStats && <InsightsView stats={currentStats} lang={lang} t={t} analysisTarget={analysisTarget} key="insights" />}
+            {view === 'insights' && <InsightsView 
+              key="insights" 
+              stats={currentStats} 
+              t={t} 
+              lang={lang} 
+              analysisTarget={analysisTarget} 
+              partnerGender={partnerGender}
+            />}
             {view === 'profile' && <ProfileView key="profile" setView={setView} t={t} lang={lang} setLang={setLang} darkMode={darkMode} setDarkMode={setDarkMode} />}
             {view === 'pricing' && <PricingView key="pricing" setView={setView} t={t} lang={lang} />}
           </AnimatePresence>
@@ -177,7 +202,12 @@ function Header({ setView, currentView, t, darkMode, setDarkMode }: { setView: (
   );
 }
 
-function DashboardView({ setView, t, lang }: { setView: (v: ViewState) => void, t: any, lang: string }) {
+function DashboardView({ stats, t, setView, analysisTarget, partnerGender }: { stats: ChatStats | null, t: any, setView: (v: ViewState) => void, analysisTarget: 'self' | 'partner', partnerGender: 'Man' | 'Women' }) {
+  const me = analysisTarget === 'self' ? stats?.participants[0] : (stats?.participants[1] || stats?.participants[0]);
+  const partner = analysisTarget === 'self' ? (stats?.participants[1] || "Partner") : stats?.participants[0];
+
+  const persona = stats && partner ? getPersona(stats, partner as string, partnerGender) : null;
+
   const recentChats = [
     { name: "Julianne Moore", date: "Bugün", emoji: "✨", color: "bg-sepia/10" },
     { name: "Mark Zuckerberg", date: "2 gün önce", emoji: "⚡", color: "bg-ink/10" },
@@ -192,19 +222,13 @@ function DashboardView({ setView, t, lang }: { setView: (v: ViewState) => void, 
       className="space-y-12 py-4"
     >
       <section className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-        <div>
+        <div className="w-full">
           <span className="text-[10px] font-bold text-sepia uppercase tracking-[0.4em]">{t.dashboard.title}</span>
-          <h2 className="text-6xl font-display text-sepia tracking-tighter">Dashboard</h2>
-          <div className="flex items-center gap-2 mt-4 px-3 py-1.5 bg-sepia/5 border border-sepia/20 rounded-full w-fit">
-            <ShieldCheck className="w-4 h-4 text-sepia" />
-            <span className="text-[10px] font-bold text-sepia uppercase tracking-widest">
-              {lang === 'tr' ? '%100 Cihaz İçi Şifreleme' : '100% On-Device Encryption'}
-            </span>
-          </div>
+          <h2 className="text-4xl md:text-6xl font-display text-sepia tracking-tighter">Dashboard</h2>
         </div>
         <button 
           onClick={() => setView('upload')}
-          className="bg-sepia text-parchment px-8 py-4 rounded-2xl font-display font-bold uppercase tracking-widest hover:-translate-y-1 hover:shadow-lg hover:shadow-sepia/30 active:scale-95 transition-all flex items-center gap-2"
+          className="w-full md:w-auto bg-sepia text-parchment px-8 py-4 rounded-2xl font-display font-bold uppercase tracking-widest shadow-lg shadow-sepia/20 hover:-translate-y-1 hover:shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2"
         >
           <span className="text-xl">➕</span>
           {t.dashboard.newAnalysis}
@@ -216,14 +240,19 @@ function DashboardView({ setView, t, lang }: { setView: (v: ViewState) => void, 
         {/* Persona Card */}
         <div className="md:col-span-2 parchment-sheet border border-sepia/20 rounded-[2rem] p-8 shadow-xl relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-40 h-40 bg-sepia/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-          <div className="flex items-start justify-between relative z-10">
-            <div className="space-y-3">
-              <p className="text-[10px] font-bold text-sepia uppercase tracking-[0.3em]">
-                {lang === 'tr' ? 'İletişim Karakterin' : 'Communication Persona'}
-              </p>
-              <h4 className="text-3xl font-display text-sepia">Gece Kuşu 🌙</h4>
+          <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+            <div className="w-32 h-32 rounded-3xl overflow-hidden border border-sepia/20 bg-parchment shadow-lg rotate-2 hover:rotate-0 transition-all duration-500">
+              <img 
+                src={persona ? `/${persona.image}` : "/peer.png"} 
+                alt="Partner Persona" 
+                className="w-full h-full object-cover filter contrast-125 grayscale hover:grayscale-0 transition-all duration-700 mix-blend-multiply" 
+              />
+            </div>
+            <div className="flex-1 text-center md:text-left space-y-2">
+              <p className="text-[10px] font-display font-bold text-gold uppercase tracking-widest">{persona ? persona.type : t.dashboard.personaTitle}</p>
+              <h3 className="text-4xl font-display text-sepia">{partner || "Partner"}</h3>
               <p className="text-sm text-ink/70 font-serif italic max-w-sm">
-                {lang === 'tr' ? 'Genelde gece saatlerinde aktifsiniz ve mesajlara ortalama 4 dakika içinde ışık hızında dönüyorsunuz.' : 'You are highly active at night and respond to messages at lightning speed, averaging 4 minutes.'}
+                {persona ? persona.description[t.appName === "Readr" ? "en" : "tr"] : t.dashboard.personaDesc}
               </p>
             </div>
           </div>
@@ -236,8 +265,8 @@ function DashboardView({ setView, t, lang }: { setView: (v: ViewState) => void, 
                💬
              </div>
              <div>
-               <p className="text-[9px] font-bold text-sepia/60 uppercase tracking-widest">{lang === 'tr' ? 'Analiz Edilen Mesaj' : 'Analyzed Messages'}</p>
-               <p className="text-2xl font-display text-sepia mt-0.5">14,500</p>
+               <p className="text-[9px] font-bold text-sepia/60 uppercase tracking-widest">{t.dashboard.analyzedMessages}</p>
+               <p className="text-2xl font-display text-sepia mt-0.5">{stats ? stats.totalMessages : 0}</p>
              </div>
           </div>
           <div className="parchment-sheet border border-sepia/20 rounded-[2rem] p-6 shadow-xl flex items-center gap-4 group">
@@ -245,7 +274,7 @@ function DashboardView({ setView, t, lang }: { setView: (v: ViewState) => void, 
                😊
              </div>
              <div>
-               <p className="text-[9px] font-bold text-sepia/60 uppercase tracking-widest">{lang === 'tr' ? 'Favori Emoji' : 'Favorite Emoji'}</p>
+               <p className="text-[9px] font-bold text-sepia/60 uppercase tracking-widest">{t.dashboard.favoriteEmoji}</p>
                <p className="text-2xl font-display text-sepia mt-0.5">😂</p>
              </div>
           </div>
@@ -282,24 +311,6 @@ function DashboardView({ setView, t, lang }: { setView: (v: ViewState) => void, 
           ))}
         </div>
       </section>
-
-      <section className="parchment-sheet border border-sepia/20 rounded-[2.5rem] p-10 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center gap-8 group">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-sepia/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-        <div className="w-20 h-20 bg-sepia/10 text-sepia rounded-[2rem] flex items-center justify-center shrink-0 group-hover:rotate-12 transition-transform">
-          <Brain className="w-10 h-10" />
-        </div>
-        <div className="relative z-10 space-y-2 flex-grow text-center md:text-left">
-          <p className="text-[10px] font-bold text-sepia uppercase tracking-[0.3em]">
-            {lang === 'tr' ? 'Son Analizden İçgörü' : 'Latest Insight'}
-          </p>
-          <h4 className="text-2xl font-display text-sepia max-w-lg">
-            {lang === 'tr' ? '"Mark ile olan konuşmalarında %65 oranında sohbeti başlatan taraf sensin."' : '"You initiate 65% of the conversations with Mark."'}
-          </h4>
-        </div>
-        <button onClick={() => setView('insights')} className="shrink-0 bg-sepia text-parchment px-6 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-sepia/80 transition-colors relative z-10">
-          {lang === 'tr' ? 'Detayları Gör' : 'View Details'}
-        </button>
-      </section>
     </motion.div>
   );
 }
@@ -333,11 +344,11 @@ function WelcomeView({ onStart, t }: { onStart: () => void, t: any, key?: string
         </motion.div>
       </div>
 
-      <div className="space-y-4">
-        <h2 className="text-5xl font-display text-sepia max-w-md mx-auto leading-tight">
+      <div className="space-y-4 px-4">
+        <h2 className="text-4xl md:text-5xl font-display text-sepia max-w-md mx-auto leading-tight">
           {t.welcome.headline}
         </h2>
-        <p className="text-lg text-ink/80 max-w-sm mx-auto leading-relaxed italic">
+        <p className="text-sm md:text-lg text-ink/80 max-w-sm mx-auto leading-relaxed italic">
           {t.welcome.description}
         </p>
       </div>
@@ -376,37 +387,6 @@ function WelcomeView({ onStart, t }: { onStart: () => void, t: any, key?: string
           {t.welcome.securityNote}
         </p>
       </div>
-
-      <motion.div 
-        initial="hidden"
-        animate="visible"
-        variants={{
-          visible: { transition: { staggerChildren: 0.1 } }
-        }}
-        className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full mt-16 text-left relative"
-      >
-        {t.welcome.features.map((item: any, i: number) => (
-          <motion.div 
-            key={i} 
-            variants={{
-              hidden: { opacity: 0, y: 30 },
-              visible: { opacity: 1, y: 0, transition: { type: 'spring', bounce: 0.4 } }
-            }}
-            whileHover={{ y: -10, scale: 1.02 }}
-            className="relative parchment-sheet p-8 rounded-[2.5rem] border border-sepia/20 shadow-xl flex flex-col gap-5 group overflow-hidden"
-          >
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-sepia/5 rounded-full blur-3xl group-hover:bg-sepia/10 group-hover:scale-150 transition-all duration-700"></div>
-            
-            <div className="relative z-10">
-              <span className="text-[10px] font-bold text-sepia uppercase tracking-widest leading-none bg-sepia/10 w-fit px-4 py-2 rounded-2xl group-hover:bg-sepia group-hover:text-parchment transition-colors duration-300">
-                {item.label}
-              </span>
-              <h3 className="text-3xl font-display text-sepia mt-6 group-hover:text-gold transition-colors duration-300">{item.title}</h3>
-              <p className="text-sm text-ink/70 leading-relaxed font-serif mt-3 italic">{item.desc}</p>
-            </div>
-          </motion.div>
-        ))}
-      </motion.div>
     </motion.div>
   );
 }
@@ -445,70 +425,30 @@ function LoginView({ onLogin, t }: { onLogin: () => void, t: any, key?: string }
               <span className="font-display uppercase tracking-widest text-xs">{t.login.apple}</span>
             </button>
           </div>
-
-          <div className="relative flex items-center py-2">
-            <div className="flex-grow border-t border-sepia/10"></div>
-            <span className="flex-shrink mx-4 text-[10px] font-bold text-sepia/40 uppercase tracking-widest font-display">{t.login.or}</span>
-            <div className="flex-grow border-t border-sepia/10"></div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="block text-[10px] font-bold text-sepia/60 px-1 uppercase tracking-widest font-display" htmlFor="email">{t.login.emailLabel}</label>
-              <input 
-                className="w-full px-5 py-4 bg-parchment border border-sepia/20 focus:ring-2 focus:ring-sepia/10 focus:border-sepia rounded-2xl font-serif text-ink placeholder:text-sepia/30 transition-all outline-none italic" 
-                id="email" 
-                placeholder={t.login.emailPlaceholder} 
-                type="email"
-              />
-            </div>
-            <button 
-              onClick={onLogin}
-              className="w-full bg-sepia text-parchment py-4 rounded-2xl font-display font-bold uppercase tracking-widest shadow-lg shadow-sepia/20 hover:-translate-y-1 hover:shadow-xl hover:shadow-sepia/30 active:scale-95 transition-all"
-            >
-              {t.login.signIn}
-            </button>
-          </div>
         </div>
       </div>
-
-      <div className="bg-sepia/5 border border-sepia/10 rounded-3xl p-6 shadow-sm space-y-4">
-        <div className="flex items-start gap-4">
-          <div className="p-2.5 bg-sepia/10 text-sepia rounded-xl">
-            <Lock className="w-5 h-5" />
-          </div>
-          <div className="space-y-1">
-            <h3 className="font-display font-bold text-sepia">{t.login.securityTitle}</h3>
-            <p className="text-xs text-ink/70 leading-relaxed font-serif italic">{t.login.securityDesc}</p>
-          </div>
-        </div>
-        <div className="space-y-2 pt-2">
-          <div className="flex justify-between items-center px-0.5">
-            <span className="text-[10px] font-bold text-sepia/40 uppercase tracking-widest font-display">{t.login.encryption}</span>
-            <span className="text-[10px] font-bold text-gold uppercase tracking-widest flex items-center gap-1 font-display">
-              <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse"></span>
-              {t.login.activeStatus}
-            </span>
-          </div>
-          <div className="h-1.5 w-full bg-sepia/5 rounded-full overflow-hidden">
-            <div className="h-full bg-gold w-full"></div>
-          </div>
-        </div>
-      </div>
-
-      <footer className="flex flex-col items-center space-y-4 pt-4 opacity-40">
-        <div className="flex gap-6 uppercase text-[10px] font-bold tracking-widest font-display">
-          {t.login.links.map((link: string, i: number) => (
-            <button key={i} className="hover:text-sepia transition-colors">{link}</button>
-          ))}
-        </div>
-        <p className="text-[9px] font-bold uppercase tracking-[0.3em] font-display text-sepia">© 2026 Kollektiv x Readr</p>
-      </footer>
     </motion.div>
   );
 }
 
-function UploadView({ onUpload, t, analysisTarget, setAnalysisTarget, lang }: { onUpload: (stats: ChatStats) => void, t: any, analysisTarget: 'self' | 'partner', setAnalysisTarget: (v: 'self'|'partner') => void, lang: string, key?: string }) {
+function UploadView({ 
+  onUpload, 
+  t, 
+  analysisTarget, 
+  setAnalysisTarget, 
+  partnerGender,
+  setPartnerGender,
+  lang 
+}: { 
+  onUpload: (stats: ChatStats) => void, 
+  t: any, 
+  analysisTarget: 'self' | 'partner', 
+  setAnalysisTarget: (v: 'self'|'partner') => void, 
+  partnerGender: 'Man' | 'Women',
+  setPartnerGender: (v: 'Man' | 'Women') => void,
+  lang: string, 
+  key?: string 
+}) {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -543,9 +483,9 @@ function UploadView({ onUpload, t, analysisTarget, setAnalysisTarget, lang }: { 
         className="hidden" 
       />
       
-      <div className="text-center space-y-4">
-        <h2 className="text-6xl font-display text-sepia tracking-tight">{t.upload.title}</h2>
-        <p className="text-ink/70 max-w-md mx-auto leading-relaxed italic">
+      <div className="text-center space-y-4 px-4">
+        <h2 className="text-4xl md:text-6xl font-display text-sepia tracking-tight">{t.upload.title}</h2>
+        <p className="text-ink/70 max-w-md mx-auto leading-relaxed italic text-sm md:text-base">
           {t.upload.description}
         </p>
       </div>
@@ -590,6 +530,41 @@ function UploadView({ onUpload, t, analysisTarget, setAnalysisTarget, lang }: { 
         </button>
       </div>
 
+      <AnimatePresence>
+        {analysisTarget === 'partner' && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="w-full flex flex-col items-center gap-6 overflow-hidden"
+          >
+            <p className="text-[10px] font-display font-bold text-sepia/40 uppercase tracking-[0.4em]">
+              {lang === 'tr' ? 'KARŞI TARAFIN CİNSİYETİ' : "PARTNER'S GENDER"}
+            </p>
+            <div className="flex gap-4">
+              <button 
+                onClick={() => setPartnerGender('Man')}
+                className={cn(
+                  "px-8 py-3 rounded-2xl font-display font-bold uppercase tracking-widest transition-all",
+                  partnerGender === 'Man' ? "bg-sepia text-parchment shadow-lg" : "bg-sepia/5 text-sepia/40 hover:bg-sepia/10"
+                )}
+              >
+                {lang === 'tr' ? 'ERKEK' : 'MAN'}
+              </button>
+              <button 
+                onClick={() => setPartnerGender('Women')}
+                className={cn(
+                  "px-8 py-3 rounded-2xl font-display font-bold uppercase tracking-widest transition-all",
+                  partnerGender === 'Women' ? "bg-sepia text-parchment shadow-lg" : "bg-sepia/5 text-sepia/40 hover:bg-sepia/10"
+                )}
+              >
+                {lang === 'tr' ? 'KADIN' : 'WOMAN'}
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div 
         onClick={triggerFileSelect}
         className="w-full parchment-sheet border-2 border-dashed border-sepia/30 rounded-[3rem] p-16 flex flex-col items-center justify-center transition-all hover:border-sepia/50 hover:bg-sepia/5 group cursor-pointer shadow-xl hover:-translate-y-1"
@@ -599,45 +574,6 @@ function UploadView({ onUpload, t, analysisTarget, setAnalysisTarget, lang }: { 
         </div>
         <h3 className="text-3xl font-display text-sepia mb-4">{t.upload.selectTitle}</h3>
         <p className="text-[10px] font-display font-bold uppercase tracking-widest opacity-60 text-sepia">{t.upload.selectSubtitle}</p>
-      </div>
-
-      <div className="w-full parchment-sheet border border-sepia/20 rounded-3xl p-8 shadow-xl relative overflow-hidden group">
-        <div className="absolute left-0 top-0 bottom-0 w-2 bg-gradient-to-b from-sepia to-gold"></div>
-        <div className="flex items-center gap-3 mb-8">
-          <ShieldCheck className="text-sepia w-6 h-6" />
-          <span className="text-xs font-display font-bold uppercase text-sepia tracking-[0.2em]">{t.upload.checklistTitle}</span>
-        </div>
-        <ul className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {t.upload.checklist.map((item: any, i: number) => (
-            <li key={i} className="flex items-start gap-4">
-              <CheckCircle2 className="text-sepia w-5 h-5 shrink-0" />
-              <div>
-                <p className="font-display font-bold text-sepia uppercase text-[10px] tracking-widest mb-1">{item.title}</p>
-                <p className="text-xs text-ink/60 leading-relaxed font-serif italic">{item.desc}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="w-full flex flex-col gap-6">
-        <button 
-          onClick={() => onUpload({} as ChatStats)} // Or handle properly
-          className="w-full py-5 parchment-sheet border border-sepia/30 text-sepia rounded-2xl font-display font-bold uppercase tracking-[0.3em] hover:bg-sepia hover:text-parchment active:scale-[0.98] shadow-lg transition-all flex items-center justify-center gap-3"
-        >
-          {t.upload.demoAnalysis}
-          <ArrowRight className="w-5 h-5" />
-        </button>
-        <button 
-          disabled 
-          className="w-full py-5 bg-sepia/5 text-sepia/40 rounded-2xl font-display font-bold uppercase tracking-[0.3em] cursor-not-allowed flex items-center justify-center gap-3"
-        >
-          {t.upload.button}
-          <ArrowRight className="w-5 h-5" />
-        </button>
-        <p className="text-center text-[10px] font-display font-bold uppercase tracking-wider opacity-40 text-sepia">
-          {t.upload.supported}
-        </p>
       </div>
     </motion.div>
   );
@@ -674,60 +610,8 @@ function ProcessingView({ progress, t }: { progress: number, t: any, key?: strin
               <span className="text-[10px] font-bold text-sepia/40 uppercase tracking-[0.3em] mt-2">{t.processing.decoding}</span>
             </div>
           </div>
-          <h2 className="text-4xl font-display text-sepia text-center mb-4">{t.processing.headline}</h2>
-          <p className="text-sm text-ink/70 text-center px-4 leading-relaxed font-serif italic">
-            {t.processing.description}
-          </p>
-        </div>
-
-        <div className="space-y-6">
-          <div className="flex items-center gap-3 mb-2">
-            <Lock className="text-sepia w-4 h-4" />
-            <span className="text-[10px] font-bold text-sepia uppercase tracking-widest leading-none font-display">{t.processing.logTitle}</span>
-          </div>
-          <div className="space-y-4">
-            <div className="flex items-start gap-4">
-              <CheckCircle2 className="text-sepia w-5 h-5 shrink-0" />
-              <div className="flex-grow">
-                <p className="text-[10px] font-bold text-sepia uppercase tracking-widest font-display">01 / {t.processing.step1}</p>
-                <div className="h-1 w-full bg-sepia/10 mt-1.5 rounded-full overflow-hidden">
-                  <div className="h-full bg-sepia w-full" />
-                </div>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="w-5 h-5 flex items-center justify-center shrink-0">
-                {progress > 40 ? <CheckCircle2 className="text-sepia w-5 h-5" /> : <div className="w-2 h-2 bg-sepia rounded-full animate-ping" />}
-              </div>
-              <div className="flex-grow">
-                <p className="text-[10px] font-bold text-sepia uppercase tracking-widest font-display">02 / {t.processing.step2}</p>
-                <div className="h-1 w-full bg-sepia/10 mt-1.5 rounded-full overflow-hidden">
-                   <motion.div initial={{ width: 0 }} animate={{ width: progress > 40 ? '100%' : `${(progress/40)*100}%` }} className="h-full bg-sepia" />
-                </div>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="w-5 h-5 flex items-center justify-center shrink-0">
-                <div className={cn("w-2 h-2 rounded-full", progress > 70 ? "bg-sepia animate-ping" : "bg-sepia/10")} />
-              </div>
-              <div className={cn("flex-grow", progress > 70 ? "opacity-100" : "opacity-30")}>
-                <p className="text-[10px] font-bold text-sepia uppercase tracking-widest font-display">03 / {t.processing.step3}</p>
-                <div className="h-1 w-full bg-sepia/10 mt-1.5 rounded-full overflow-hidden">
-                  <motion.div initial={{ width: 0 }} animate={{ width: progress > 70 ? `${(progress-70)*3.33}%` : '0%' }} className="h-full bg-gold" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-12 flex items-center justify-center gap-3 pt-8 border-t border-sepia/10">
-          <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain mix-blend-multiply grayscale" />
-          <span className="text-[10px] font-bold text-sepia uppercase tracking-[0.2em] font-display">{t.processing.badge}</span>
         </div>
       </div>
-      <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-sepia/40 max-w-xs text-center leading-relaxed font-display">
-        {t.processing.note}
-      </p>
     </motion.div>
   );
 }
@@ -824,18 +708,17 @@ function ComparisonCard({
           <p className="text-lg font-bold text-sepia font-display">{partnerValue.toLocaleString()}</p>
         </div>
       </div>
-      
-      {/* Decorative background element */}
-      <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-sepia/5 rounded-full blur-3xl group-hover:bg-sepia/10 transition-colors"></div>
     </motion.div>
   );
 }
 
-function InsightsView({ t, stats, lang, analysisTarget }: { t: any, stats: ChatStats | null, lang: Language, analysisTarget: 'self' | 'partner', key?: string }) {
+function InsightsView({ t, stats, lang, analysisTarget, partnerGender }: { t: any, stats: ChatStats | null, lang: Language, analysisTarget: 'self' | 'partner', partnerGender: 'Man' | 'Women', key?: string }) {
   if (!stats) return null;
 
   const me = analysisTarget === 'self' ? stats.participants[0] : (stats.participants[1] || stats.participants[0]);
   const partner = analysisTarget === 'self' ? (stats.participants[1] || "Partner") : stats.participants[0];
+
+  const persona = partner ? getPersona(stats, partner as string, partnerGender) : null;
 
   const meMetrics = {
     words: stats.wordCountPerPerson[me] || 0,
@@ -863,20 +746,29 @@ function InsightsView({ t, stats, lang, analysisTarget }: { t: any, stats: ChatS
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="space-y-16 py-4"
+      className="space-y-12 md:space-y-16 py-4"
     >
-      <section className="space-y-4 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-        <div>
-          <span className="text-[10px] font-bold text-sepia uppercase tracking-[0.4em] font-display">{t.insights.category} / {new Date().getFullYear()}</span>
-          <h2 className="text-7xl font-display text-sepia tracking-tighter">{t.insights.headline} {partner}</h2>
-          <div className="h-1 w-32 bg-sepia mt-4" />
+      <section className="space-y-6 md:space-y-4 flex flex-col md:flex-row justify-between items-center md:items-end gap-6 text-center md:text-left">
+        <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
+          <div className="w-32 h-32 md:w-40 md:h-40 rounded-3xl overflow-hidden border border-sepia/20 bg-parchment shadow-2xl rotate-[-2deg] shrink-0">
+             <img 
+                src={persona ? `/${persona.image}` : "/peer.png"} 
+                alt="Partner Persona" 
+                className="w-full h-full object-cover filter contrast-125 grayscale mix-blend-multiply" 
+              />
+          </div>
+          <div className="space-y-2">
+            <span className="text-[10px] font-bold text-sepia uppercase tracking-[0.4em] font-display">{persona ? persona.type : t.insights.category} / {new Date().getFullYear()}</span>
+            <h2 className="text-4xl md:text-7xl font-display text-sepia tracking-tighter leading-none">{t.insights.headline} {partner}</h2>
+            <div className="h-1 w-24 md:w-32 bg-sepia mt-4 mx-auto md:mx-0" />
+          </div>
         </div>
-        <button className="bg-sepia text-parchment px-6 py-3 rounded-2xl font-display font-bold uppercase tracking-widest hover:-translate-y-1 hover:shadow-lg hover:shadow-sepia/30 active:scale-95 transition-all flex items-center gap-2">
+        <button className="w-full md:w-auto bg-sepia text-parchment px-8 py-4 rounded-2xl font-display font-bold uppercase tracking-widest hover:-translate-y-1 hover:shadow-lg hover:shadow-sepia/30 active:scale-95 transition-all flex items-center justify-center gap-2">
           📤 {t.insights.shareToStory}
         </button>
       </section>
 
-      <section className="parchment-sheet border border-sepia/20 rounded-[2.5rem] p-10 shadow-xl relative overflow-hidden">
+      <section className="parchment-sheet border border-sepia/20 rounded-[2.5rem] p-6 md:p-12 shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-sepia/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
         <div className="space-y-8">
@@ -1017,19 +909,19 @@ function InsightsView({ t, stats, lang, analysisTarget }: { t: any, stats: ChatS
         </div>
       </section>
 
-      <section className="bg-sepia text-parchment p-12 flex flex-col md:flex-row items-center gap-12 rounded-[2.5rem] relative overflow-hidden shadow-2xl">
+      <section className="bg-sepia text-parchment p-8 md:p-12 flex flex-col lg:flex-row items-center gap-8 md:gap-12 rounded-[2.5rem] relative overflow-hidden shadow-2xl">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-sepia to-gold"></div>
-        <div className="absolute right-[-40px] top-[-40px] opacity-10 rotate-12 text-parchment">
+        <div className="absolute right-[-40px] top-[-40px] opacity-10 rotate-12 text-parchment hidden md:block">
           <ShieldAlert className="w-80 h-80" />
         </div>
-        <div className="relative z-10 flex-1 space-y-4">
-          <h4 className="text-4xl font-display text-parchment">{t.insights.privacyGuaranteed}</h4>
-          <p className="text-base text-parchment/60 leading-relaxed max-w-lg font-serif italic">
+        <div className="relative z-10 flex-1 space-y-4 text-center md:text-left">
+          <h4 className="text-3xl md:text-4xl font-display text-parchment">{t.insights.privacyGuaranteed}</h4>
+          <p className="text-sm md:text-base text-parchment/60 leading-relaxed max-w-lg font-serif italic mx-auto md:mx-0">
             {t.insights.privacyDesc}
           </p>
         </div>
-        <div className="relative z-10 shrink-0">
-          <button className="bg-parchment text-sepia px-8 py-4 rounded-2xl font-display font-bold uppercase tracking-[0.2em] hover:bg-gold hover:text-parchment transition-all active:scale-95 shadow-lg">
+        <div className="relative z-10 shrink-0 w-full md:w-auto">
+          <button className="w-full md:w-auto bg-parchment text-sepia px-8 py-4 rounded-2xl font-display font-bold uppercase tracking-[0.2em] hover:bg-gold hover:text-parchment transition-all active:scale-95 shadow-lg">
             {t.insights.auditSecurity}
           </button>
         </div>
@@ -1228,14 +1120,14 @@ function PricingView({ setView, t }: { setView: (v: ViewState) => void, t: any, 
       exit={{ opacity: 0, y: -20 }}
       className="max-w-6xl mx-auto space-y-16 py-10"
     >
-      <div className="text-center space-y-6 max-w-2xl mx-auto">
-        <h2 className="text-5xl md:text-6xl font-display text-sepia tracking-tight">{t.pricing.title}</h2>
-        <p className="text-ink/70 leading-relaxed font-serif text-lg italic">
+      <div className="text-center space-y-6 max-w-2xl mx-auto px-4">
+        <h2 className="text-4xl md:text-6xl font-display text-sepia tracking-tight">{t.pricing.title}</h2>
+        <p className="text-ink/70 leading-relaxed font-serif text-base md:text-lg italic">
           {t.pricing.subtitle}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 px-4 md:px-0">
         {plans.map((plan, i) => {
           const planData = t.pricing.plans[plan.id as keyof typeof t.pricing.plans];
           return (
