@@ -103,7 +103,7 @@ export default function App() {
               localStorage.setItem('readr-onboarded', 'true');
               setView('login');
             }} t={t} />}
-            {view === 'dashboard' && <DashboardView key="dashboard" setView={setView} t={t} />}
+            {view === 'dashboard' && <DashboardView key="dashboard" setView={setView} t={t} lang={lang} />}
             {view === 'login' && <LoginView key="login" onLogin={() => setView('upload')} t={t} />}
             {view === 'upload' && <UploadView key="upload" onUpload={(stats) => {
               setCurrentStats(stats);
@@ -180,7 +180,7 @@ function Header({ setView, currentView, t, darkMode, setDarkMode }: { setView: (
   );
 }
 
-function DashboardView({ setView, t }: { setView: (v: ViewState) => void, t: any }) {
+function DashboardView({ setView, t, lang }: { setView: (v: ViewState) => void, t: any, lang: string }) {
   const recentChats = [
     { name: "Julianne Moore", date: "Today", emoji: "✨", color: "bg-accent" },
     { name: "Mark Zuckerberg", date: "2 days ago", emoji: "⚡", color: "bg-ink" },
@@ -198,7 +198,12 @@ function DashboardView({ setView, t }: { setView: (v: ViewState) => void, t: any
         <div>
           <span className="text-[10px] font-bold text-accent uppercase tracking-[0.4em]">{t.dashboard.title}</span>
           <h2 className="text-6xl font-serif italic text-ink tracking-tighter">Dashboard</h2>
-          <p className="text-lg text-ink/60 font-serif italic mt-2">{t.dashboard.subtitle}</p>
+          <div className="flex items-center gap-2 mt-4 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-full w-fit">
+            <ShieldCheck className="w-4 h-4 text-green-600 dark:text-green-400" />
+            <span className="text-[10px] font-bold text-green-700 dark:text-green-400 uppercase tracking-widest">
+              {lang === 'tr' ? '%100 Cihaz İçi Şifreleme' : '100% On-Device Encryption'}
+            </span>
+          </div>
         </div>
         <button 
           onClick={() => setView('upload')}
@@ -207,6 +212,47 @@ function DashboardView({ setView, t }: { setView: (v: ViewState) => void, t: any
           <span className="text-xl">➕</span>
           {t.dashboard.newAnalysis}
         </button>
+      </section>
+
+      {/* Mini Stats & Persona */}
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Persona Card */}
+        <div className="md:col-span-2 bg-gradient-to-br from-indigo-500/10 to-rose-500/10 border border-ink/10 rounded-[2rem] p-8 shadow-xl shadow-ink/5 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+          <div className="flex items-start justify-between relative z-10">
+            <div className="space-y-3">
+              <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-[0.3em]">
+                {lang === 'tr' ? 'İletişim Karakterin' : 'Communication Persona'}
+              </p>
+              <h4 className="text-3xl font-serif italic text-ink">Gece Kuşu 🌙</h4>
+              <p className="text-sm text-ink/70 font-serif italic max-w-sm">
+                {lang === 'tr' ? 'Genelde gece saatlerinde aktifsiniz ve mesajlara ortalama 4 dakika içinde ışık hızında dönüyorsunuz.' : 'You are highly active at night and respond to messages at lightning speed, averaging 4 minutes.'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Mini Stats */}
+        <div className="grid grid-rows-2 gap-6">
+          <div className="bg-white dark:bg-zinc-900 border border-ink/10 rounded-[2rem] p-6 shadow-xl shadow-ink/5 flex items-center gap-4 group">
+             <div className="w-12 h-12 bg-rose-500/10 text-rose-500 rounded-2xl flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
+               💬
+             </div>
+             <div>
+               <p className="text-[9px] font-bold text-ink/40 uppercase tracking-widest">{lang === 'tr' ? 'Analiz Edilen Mesaj' : 'Analyzed Messages'}</p>
+               <p className="text-2xl font-serif italic text-ink mt-0.5">14,500</p>
+             </div>
+          </div>
+          <div className="bg-white dark:bg-zinc-900 border border-ink/10 rounded-[2rem] p-6 shadow-xl shadow-ink/5 flex items-center gap-4 group">
+             <div className="w-12 h-12 bg-amber-500/10 text-amber-500 rounded-2xl flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
+               😊
+             </div>
+             <div>
+               <p className="text-[9px] font-bold text-ink/40 uppercase tracking-widest">{lang === 'tr' ? 'Favori Emoji' : 'Favorite Emoji'}</p>
+               <p className="text-2xl font-serif italic text-ink mt-0.5">😂</p>
+             </div>
+          </div>
+        </div>
       </section>
 
       <section className="space-y-6">
@@ -240,16 +286,22 @@ function DashboardView({ setView, t }: { setView: (v: ViewState) => void, t: any
         </div>
       </section>
 
-      <section className="bg-white dark:bg-zinc-900 border border-ink/10 rounded-[2.5rem] p-12 text-center space-y-6 shadow-xl shadow-ink/5 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-        <div className="relative z-10 space-y-4">
-          <div className="text-5xl drop-shadow-sm">📊</div>
-          <div className="space-y-2">
-            <h4 className="text-2xl font-serif italic text-ink">Aggregated Insights</h4>
-            <p className="text-sm text-ink/60 max-w-sm mx-auto font-serif">View your overall communication trends across all analyzed conversations.</p>
-          </div>
-          <button onClick={() => setView('pricing')} className="text-[10px] font-bold text-indigo-500 uppercase tracking-[0.4em] hover:underline px-6 py-2 rounded-full bg-indigo-500/10 transition-colors">Unlock Premium View</button>
+      <section className="bg-white dark:bg-zinc-900 border border-ink/10 rounded-[2.5rem] p-10 shadow-xl shadow-ink/5 relative overflow-hidden flex flex-col md:flex-row items-center gap-8 group">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        <div className="w-20 h-20 bg-rose-500/10 text-rose-500 rounded-[2rem] flex items-center justify-center shrink-0 group-hover:rotate-12 transition-transform">
+          <Brain className="w-10 h-10" />
         </div>
+        <div className="relative z-10 space-y-2 flex-grow text-center md:text-left">
+          <p className="text-[10px] font-bold text-rose-500 uppercase tracking-[0.3em]">
+            {lang === 'tr' ? 'Son Analizden İçgörü' : 'Latest Insight'}
+          </p>
+          <h4 className="text-2xl font-serif italic text-ink max-w-lg">
+            {lang === 'tr' ? '"Mark ile olan konuşmalarında %65 oranında sohbeti başlatan taraf sensin."' : '"You initiate 65% of the conversations with Mark."'}
+          </h4>
+        </div>
+        <button onClick={() => setView('insights')} className="shrink-0 bg-ink text-bg px-6 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-accent transition-colors relative z-10">
+          {lang === 'tr' ? 'Detayları Gör' : 'View Details'}
+        </button>
       </section>
     </motion.div>
   );
@@ -263,24 +315,15 @@ function WelcomeView({ onStart, t }: { onStart: () => void, t: any, key?: string
       exit={{ opacity: 0, y: -20 }}
       className="flex flex-col items-center text-center space-y-12 py-10"
     >
-      <div className="relative w-64 h-64 flex items-center justify-center">
-        <div className="absolute inset-0 bg-secondary-container opacity-20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="relative z-10 grid grid-cols-2 gap-4">
-          <motion.div 
-            animate={{ rotate: [-6, -4, -6], y: [0, -5, 0] }}
-            transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-            className="w-24 h-24 bg-white dark:bg-zinc-800 shadow-sm border border-outline-variant rounded-xl flex items-center justify-center transform -rotate-6"
-          >
-            <BarChart3 className="text-primary w-10 h-10" />
-          </motion.div>
-          <motion.div 
-            animate={{ rotate: [12, 14, 12], y: [0, 5, 0] }}
-            transition={{ repeat: Infinity, duration: 4, ease: "easeInOut", delay: 0.5 }}
-            className="w-24 h-24 bg-white dark:bg-zinc-800 shadow-sm border border-outline-variant rounded-xl flex items-center justify-center translate-y-8 rotate-12"
-          >
-            <Activity className="text-secondary w-10 h-10" />
-          </motion.div>
-        </div>
+      <div className="relative w-72 h-72 flex items-center justify-center mb-4">
+        <div className="absolute inset-0 bg-indigo-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <motion.div 
+          animate={{ y: [0, -10, 0] }}
+          transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+          className="relative z-10 w-64 h-64 rounded-[3rem] overflow-hidden shadow-2xl shadow-indigo-500/30 border-4 border-white dark:border-zinc-800 bg-white"
+        >
+          <img src="/character.png" alt="3D Tech Character" className="w-full h-full object-cover" />
+        </motion.div>
       </div>
 
       <div className="space-y-4">
@@ -309,15 +352,37 @@ function WelcomeView({ onStart, t }: { onStart: () => void, t: any, key?: string
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mt-16 text-left">
+      <motion.div 
+        initial="hidden"
+        animate="visible"
+        variants={{
+          visible: { transition: { staggerChildren: 0.1 } }
+        }}
+        className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full mt-16 text-left relative"
+      >
         {t.welcome.features.map((item: any, i: number) => (
-          <div key={i} className="bg-white dark:bg-zinc-900 p-8 rounded-3xl border border-ink/10 shadow-xl shadow-ink/5 flex flex-col gap-4 group hover:-translate-y-1 hover:shadow-indigo-500/5 transition-all">
-            <span className="text-[9px] font-bold text-indigo-500 uppercase tracking-widest leading-none bg-indigo-500/10 w-fit px-3 py-1.5 rounded-full">{item.label}</span>
-            <h3 className="text-2xl font-serif italic text-ink">{item.title}</h3>
-            <p className="text-sm text-ink/70 leading-relaxed font-serif">{item.desc}</p>
-          </div>
+          <motion.div 
+            key={i} 
+            variants={{
+              hidden: { opacity: 0, y: 30 },
+              visible: { opacity: 1, y: 0, transition: { type: 'spring', bounce: 0.4 } }
+            }}
+            whileHover={{ y: -10, scale: 1.02 }}
+            className="relative bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/50 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] flex flex-col gap-5 group overflow-hidden"
+          >
+            {/* Animated glowing orb behind each card */}
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl group-hover:bg-indigo-500/20 group-hover:scale-150 transition-all duration-700"></div>
+            
+            <div className="relative z-10">
+              <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest leading-none bg-indigo-500/10 w-fit px-4 py-2 rounded-2xl group-hover:bg-indigo-500 group-hover:text-white transition-colors duration-300">
+                {item.label}
+              </span>
+              <h3 className="text-3xl font-serif italic text-ink mt-6 group-hover:text-indigo-500 transition-colors duration-300">{item.title}</h3>
+              <p className="text-sm text-ink/70 leading-relaxed font-serif mt-3">{item.desc}</p>
+            </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </motion.div>
   );
 }
