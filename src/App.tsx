@@ -623,7 +623,9 @@ function ComparisonCard({
   unit, 
   t, 
   inverse = false,
-  emoji
+  emoji,
+  me: meName,
+  partner: partnerName,
 }: { 
   title: string, 
   meValue: number, 
@@ -631,7 +633,9 @@ function ComparisonCard({
   unit: string, 
   t: any,
   inverse?: boolean,
-  emoji: string
+  emoji: string,
+  me?: string,
+  partner?: string,
 }) {
   const meColor = "var(--color-sepia)";
   const partnerColor = "var(--color-gold)";
@@ -696,16 +700,20 @@ function ComparisonCard({
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: meColor }}></div>
-            <span className="text-[9px] font-bold uppercase tracking-widest text-sepia/40 font-display">{t.insights.comparison.me}</span>
+            <span className="text-[9px] font-bold uppercase tracking-widest text-sepia/60 font-display truncate max-w-[80px]">
+              {meName || t.insights.comparison.me}
+            </span>
           </div>
           <p className="text-lg font-bold text-sepia font-display">{meValue.toLocaleString()}</p>
         </div>
         <div className="space-y-1 text-right">
           <div className="flex items-center gap-2 justify-end">
-            <span className="text-[9px] font-bold uppercase tracking-widest text-sepia/40 font-display">{t.insights.comparison.partner}</span>
-            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: partnerColor }}></div>
+            <span className="text-[9px] font-bold uppercase tracking-widest text-gold/80 font-display truncate max-w-[80px]">
+              {partnerName || t.insights.comparison.partner}
+            </span>
+            <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: partnerColor }}></div>
           </div>
-          <p className="text-lg font-bold text-sepia font-display">{partnerValue.toLocaleString()}</p>
+          <p className="text-lg font-bold text-gold font-display">{partnerValue.toLocaleString()}</p>
         </div>
       </div>
     </motion.div>
@@ -838,57 +846,83 @@ function InsightsView({ t, stats, lang, analysisTarget, partnerGender }: { t: an
         <div className="flex flex-col gap-2">
           <h4 className="text-[10px] font-bold text-sepia uppercase tracking-[0.3em] font-display">{t.insights.comparison.title}</h4>
           <p className="text-sm text-ink/60 font-serif italic">{t.insights.comparison.subtitle}</p>
+          {/* Color legend */}
+          <div className="flex items-center gap-6 mt-1">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'var(--color-sepia)' }} />
+              <span className="text-[10px] font-display font-bold text-sepia uppercase tracking-widest">{me || t.insights.comparison.me}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'var(--color-gold)' }} />
+              <span className="text-[10px] font-display font-bold text-gold uppercase tracking-widest">{partner || t.insights.comparison.partner}</span>
+            </div>
+          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <ComparisonCard title={t.insights.comparison.wordCount} meValue={meMetrics.words} partnerValue={partnerMetrics.words} unit={t.insights.comparison.metrics.words} emoji="📝" t={t} />
-          <ComparisonCard title={t.insights.comparison.responseTime} meValue={meMetrics.responseTime} partnerValue={partnerMetrics.responseTime} unit={t.insights.comparison.metrics.minutes} emoji="⏱️" inverse t={t} />
-          <ComparisonCard title={t.insights.comparison.emojis} meValue={meMetrics.emojis} partnerValue={partnerMetrics.emojis} unit={t.insights.comparison.metrics.emojis} emoji="😊" t={t} />
-          <ComparisonCard title={t.insights.comparison.doubleTexting} meValue={meMetrics.doubleText} partnerValue={partnerMetrics.doubleText} unit="Times" emoji="⏭️" inverse t={t} />
-          <ComparisonCard title={t.insights.comparison.messages} meValue={meMetrics.messages} partnerValue={partnerMetrics.messages} unit="Msg" emoji="💬" t={t} />
+          <ComparisonCard title={t.insights.comparison.wordCount} meValue={meMetrics.words} partnerValue={partnerMetrics.words} unit={t.insights.comparison.metrics.words} emoji="📝" t={t} me={me} partner={partner} />
+          <ComparisonCard title={t.insights.comparison.responseTime} meValue={meMetrics.responseTime} partnerValue={partnerMetrics.responseTime} unit={t.insights.comparison.metrics.minutes} emoji="⏱️" inverse t={t} me={me} partner={partner} />
+          <ComparisonCard title={t.insights.comparison.emojis} meValue={meMetrics.emojis} partnerValue={partnerMetrics.emojis} unit={t.insights.comparison.metrics.emojis} emoji="😊" t={t} me={me} partner={partner} />
+          <ComparisonCard title={t.insights.comparison.doubleTexting} meValue={meMetrics.doubleText} partnerValue={partnerMetrics.doubleText} unit="Times" emoji="⏭️" inverse t={t} me={me} partner={partner} />
+          <ComparisonCard title={t.insights.comparison.messages} meValue={meMetrics.messages} partnerValue={partnerMetrics.messages} unit="Msg" emoji="💬" t={t} me={me} partner={partner} />
         </div>
         
         {/* Activity Chart */}
-        <div className="parchment-sheet border border-sepia/20 rounded-3xl p-8 shadow-xl mt-8">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-            <h5 className="text-xl font-display text-sepia">Hourly Activity Density</h5>
+        <div className="parchment-sheet border border-sepia/20 rounded-3xl p-6 md:p-8 shadow-xl mt-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-6">
+            <div>
+              <h5 className="text-xl font-display text-sepia">
+                {lang === 'tr' ? 'Saatlik Aktivite Yoğunluğu' : 'Hourly Activity Density'}
+              </h5>
+              <p className="text-xs text-sepia/50 font-serif italic mt-0.5">
+                {lang === 'tr' ? 'Hangi saatlerde daha çok mesajlaşıyorsunuz?' : 'Which hours are most active in this conversation?'}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-sepia/5 rounded-xl border border-sepia/10">
+              <div className="w-2 h-2 rounded-full bg-sepia" />
+              <span className="text-[9px] font-display font-bold text-sepia/60 uppercase tracking-widest">
+                {lang === 'tr' ? 'Tüm Katılımcılar' : 'All Participants'}
+              </span>
+            </div>
           </div>
-          <div className="h-[300px] w-full">
+          <div className="h-[220px] md:h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
+              <BarChart data={chartData} barCategoryGap="20%">
                 <defs>
                   <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-sepia)" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="var(--color-sepia)" stopOpacity={0.2}/>
+                    <stop offset="0%" stopColor="var(--color-sepia)" stopOpacity={0.9}/>
+                    <stop offset="100%" stopColor="var(--color-sepia)" stopOpacity={0.15}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-sepia)" opacity={0.1} />
+                <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="var(--color-sepia)" opacity={0.08} />
                 <XAxis 
                   dataKey="name" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fontWeight: 'bold', fill: 'var(--color-sepia)', opacity: 0.5, fontFamily: 'Cinzel' }}
+                  interval={2}
+                  tick={{ fontSize: 9, fontWeight: 'bold', fill: 'var(--color-sepia)', opacity: 0.6, fontFamily: 'Cinzel' }}
                 />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fontWeight: 'bold', fill: 'var(--color-sepia)', opacity: 0.5, fontFamily: 'Cinzel' }}
+                  width={30}
+                  tick={{ fontSize: 9, fontWeight: 'bold', fill: 'var(--color-sepia)', opacity: 0.6, fontFamily: 'Cinzel' }}
                 />
                 <Tooltip 
-                  cursor={{ fill: 'var(--color-sepia)', opacity: 0.05 }}
+                  cursor={{ fill: 'var(--color-sepia)', opacity: 0.04 }}
                   contentStyle={{ 
-                    borderRadius: '1rem', 
+                    borderRadius: '0.75rem', 
                     backgroundColor: 'var(--color-parchment)',
                     border: '1px solid var(--color-sepia)',
-                    opacity: 0.9,
-                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-                    fontSize: '10px',
-                    fontWeight: 'bold',
-                    textTransform: 'uppercase',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                    fontSize: '11px',
                     fontFamily: 'Cinzel',
-                    color: 'var(--color-sepia)'
+                    color: 'var(--color-sepia)',
+                    padding: '8px 12px',
                   }}
+                  formatter={(value: any) => [`${value} ${lang === 'tr' ? 'mesaj' : 'msgs'}`, '']}
+                  labelFormatter={(label) => `🕐 ${label}`}
                 />
-                <Bar dataKey="value" fill="url(#colorValue)" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="value" fill="url(#colorValue)" radius={[4, 4, 0, 0]} maxBarSize={28} />
               </BarChart>
             </ResponsiveContainer>
           </div>
