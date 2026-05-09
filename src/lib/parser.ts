@@ -111,5 +111,12 @@ export async function parseChatFile(fileContent: string): Promise<ChatStats> {
     }
   });
 
+  if (stats.totalMessages === 0) {
+    throw new Error('Geçerli WhatsApp mesajı bulunamadı. Lütfen dışa aktarılmış doğru bir .txt dosyası yüklediğinizden emin olun.');
+  }
+  if (stats.participants.length < 2) {
+    throw new Error('Analiz için en az iki katılımcının olduğu bir sohbet yüklemelisiniz.');
+  }
+
   return stats;
 }

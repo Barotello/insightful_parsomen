@@ -10,7 +10,7 @@ export type PersonaType =
 export interface PersonaInfo {
   type: PersonaType;
   image: string;
-  label: string;
+  label: Record<'en' | 'tr', string>;
   description: Record<'en' | 'tr', string>;
 }
 
@@ -59,33 +59,41 @@ export function getPersona(stats: ChatStats, person: string, gender: 'Man' | 'Wo
     'Cautious Skeptic': `Cautious Skeptic_${gender}.png`
   };
 
+  const labels: Record<PersonaType, Record<'en' | 'tr', string>> = {
+    'Logical Analyst': { en: 'The Logical Analyst', tr: 'Analitik Stratejist' },
+    'Energetic Extravert': { en: 'The Energetic Extravert', tr: 'Enerjik Sosyal Kelebek' },
+    'Empathetic Nurturer': { en: 'The Empathetic Nurturer', tr: 'Duygusal Destekçi' },
+    'Dreamy Visionary': { en: 'The Dreamy Visionary', tr: 'Hayalperest Vizyoner' },
+    'Cautious Skeptic': { en: 'The Cautious Skeptic', tr: 'Gizemli Gözlemci' }
+  };
+
   const descriptions: Record<PersonaType, Record<'en' | 'tr', string>> = {
     'Logical Analyst': {
-      en: "Focuses on facts and clear communication. Doesn't use many emojis but stays very consistent.",
-      tr: "Gerçeklere ve net iletişime odaklanır. Çok fazla emoji kullanmaz ama oldukça tutarlıdır."
+      en: "Logical, detail-oriented, speaks briefly and concisely, acts based on data. Generally uses proper spelling and clear information in messages.",
+      tr: "Mantıklı, detaycı, az ve öz konuşan, veriye dayalı hareket eden tip. Mesajlarında genellikle düzgün bir imla ve net bilgiler kullanır."
     },
     'Energetic Extravert': {
-      en: "Full of life and expression! Uses many emojis and responds quickly to keep the conversation going.",
-      tr: "Hayat ve ifade dolu! Sohbeti sürdürmek için çok sayıda emoji kullanır ve hızlı yanıt verir."
+      en: "Uses plenty of emojis, never misses an exclamation mark, writes quickly and excitedly. Radiates positive energy.",
+      tr: "Bolca emoji kullanan, ünlemi eksik etmeyen, hızlı ve heyecanlı yazan tip. Pozitif enerji saçar."
     },
     'Empathetic Nurturer': {
-      en: "Warm and caring. Their messages are filled with emotional support and kindness.",
-      tr: "Sıcak ve şefkatli. Mesajları duygusal destek ve nezaketle doludur."
+      en: "Uses soft language, validates the other person, loves affectionate terms, writes long and thoughtful messages.",
+      tr: "Yumuşak bir dil kullanan, karşısındakini onaylayan, 'canım, tatlım' gibi hitapları seven, uzun ve düşünceli mesajlar yazan tip."
     },
     'Dreamy Visionary': {
-      en: "Often active at night, sending long and thoughtful messages. A true deep thinker.",
-      tr: "Genellikle geceleri aktiftir, uzun ve düşünceli mesajlar gönderir. Gerçek bir derin düşünür."
+      en: "Speaks abstractly, full of ideas, sometimes goes off-topic, sends creative and inspiring messages.",
+      tr: "Soyut konuşan, fikirlerle dolu, bazen konudan sapan, yaratıcı ve ilham verici mesajlar atan tip."
     },
     'Cautious Skeptic': {
-      en: "Observant and brief. Chooses their words carefully and takes time to respond.",
-      tr: "Gözlemci ve kısa öz. Kelimelerini dikkatle seçer ve yanıt vermek için zaman ayırır."
+      en: "Gives short answers, usually says 'hmm, we'll see, ok', distant but intriguing. Messages might be a bit cold but deep.",
+      tr: "Kısa cevaplar veren, genellikle 'hmm, bakarız, tamam' diyen, mesafeli ama merak uyandırıcı tip. Mesajları biraz soğuk ama derin olabilir."
     }
   };
 
   return {
     type,
     image: imageMap[type],
-    label: type,
+    label: labels[type],
     description: descriptions[type]
   };
 }

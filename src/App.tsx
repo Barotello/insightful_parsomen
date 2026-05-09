@@ -1,25 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  ShieldCheck, 
-  Settings, 
-  ChevronRight, 
-  Upload, 
-  ArrowRight, 
-  Lock, 
-  BarChart3, 
-  Activity, 
-  CheckCircle2, 
-  User, 
+import {
+  ShieldCheck,
+  Settings,
+  ChevronRight,
+  Upload,
+  ArrowRight,
+  Lock,
+  BarChart3,
+  Activity,
+  CheckCircle2,
+  User,
   Sparkles,
-  Bolt, 
-  CircleHelp, 
-  MessagesSquare, 
-  Moon, 
+  Bolt,
+  CircleHelp,
+  MessagesSquare,
+  Moon,
   Sun,
-  Info, 
-  History, 
-  Brain, 
-  ShieldAlert, 
+  Info,
+  History,
+  Brain,
+  ShieldAlert,
   LogOut,
   Smile,
   Timer,
@@ -37,9 +37,11 @@ import { translations, Language } from './locales';
 import { parseChatFile, ChatStats } from './lib/parser';
 import { generateAISynthesis } from './lib/gemini';
 import { getPersona, PersonaInfo } from './lib/persona';
+import { Toaster, toast } from 'react-hot-toast';
+import html2canvas from 'html2canvas';
 
 // Types
-type ViewState = 'welcome' | 'login' | 'upload' | 'processing' | 'insights' | 'profile' | 'dashboard' | 'pricing';
+type ViewState = 'welcome' | 'login' | 'upload' | 'processing' | 'insights' | 'profile' | 'dashboard';
 
 export default function App() {
   const [view, setView] = useState<ViewState>(() => {
@@ -93,54 +95,65 @@ export default function App() {
   }, [view]);
 
   return (
-    <div className="min-h-screen bg-parchment text-ink font-serif selection:bg-sepia/20 flex flex-col md:flex-row">
+    <div lang={lang} className="min-h-screen bg-parchment text-ink font-serif selection:bg-sepia/20 flex flex-col md:flex-row">
       <div className="flex-1 flex flex-col min-w-0">
         <Header setView={setView} currentView={view} t={t} darkMode={darkMode} setDarkMode={setDarkMode} />
-        
+
         <main className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12 pb-32">
           <AnimatePresence mode="wait">
             {view === 'welcome' && <WelcomeView key="welcome" onStart={() => {
               localStorage.setItem('readr-onboarded', 'true');
-              setView('login');
+              setView('upload');
             }} t={t} />}
-            {view === 'dashboard' && <DashboardView 
-              key="dashboard" 
-              stats={currentStats} 
-              t={t} 
-              setView={setView} 
+            {view === 'dashboard' && <DashboardView
+              key="dashboard"
+              stats={currentStats}
+              t={t}
+              setView={setView}
               analysisTarget={analysisTarget}
               partnerGender={partnerGender}
+              lang={lang}
             />}
-            {view === 'login' && <LoginView key="login" onLogin={() => setView('upload')} t={t} />}
-            {view === 'upload' && <UploadView 
-              key="upload" 
-              lang={lang} 
-              analysisTarget={analysisTarget} 
-              setAnalysisTarget={setAnalysisTarget} 
+            {view === 'upload' && <UploadView
+              key="upload"
+              lang={lang}
+              analysisTarget={analysisTarget}
+              setAnalysisTarget={setAnalysisTarget}
               partnerGender={partnerGender}
               setPartnerGender={setPartnerGender}
               onUpload={(stats) => {
                 setCurrentStats(stats);
                 setView('processing');
-              }} 
-              t={t} 
+              }}
+              t={t}
             />}
             {view === 'processing' && <ProcessingView key="processing" progress={processingProgress} t={t} />}
-            {view === 'insights' && <InsightsView 
-              key="insights" 
-              stats={currentStats} 
-              t={t} 
-              lang={lang} 
-              analysisTarget={analysisTarget} 
+            {view === 'insights' && <InsightsView
+              key="insights"
+              stats={currentStats}
+              t={t}
+              lang={lang}
+              analysisTarget={analysisTarget}
               partnerGender={partnerGender}
             />}
             {view === 'profile' && <ProfileView key="profile" setView={setView} t={t} lang={lang} setLang={setLang} darkMode={darkMode} setDarkMode={setDarkMode} />}
-            {view === 'pricing' && <PricingView key="pricing" setView={setView} t={t} lang={lang} />}
           </AnimatePresence>
         </main>
 
         <Navigation setView={setView} currentView={view} t={t} />
       </div>
+      <Toaster
+        position="bottom-center"
+        toastOptions={{
+          style: {
+            background: 'var(--color-parchment)',
+            color: 'var(--color-sepia)',
+            border: '1px solid var(--color-sepia)',
+            fontFamily: 'Cinzel, serif',
+            fontSize: '12px',
+          },
+        }}
+      />
     </div>
   );
 }
@@ -153,19 +166,19 @@ function Header({ setView, currentView, t, darkMode, setDarkMode }: { setView: (
 
   return (
     <header className="sticky top-0 z-50 bg-parchment/80 backdrop-blur-sm flex items-center justify-between px-6 py-6 md:py-8 border-b border-sepia/10">
-      <div className="w-10"></div> 
-      
+      <div className="w-10"></div>
+
       <div className="flex items-center gap-2 md:gap-3 cursor-pointer" onClick={() => setView(localStorage.getItem('readr-onboarded') === 'true' ? 'dashboard' : 'welcome')}>
         {!isLanding && (
-          <motion.img 
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            src="/logo.png" 
-            alt="Readr Logo" 
-            className="w-8 h-8 md:w-10 md:h-10 object-contain mix-blend-multiply grayscale contrast-125" 
-          />
+            <motion.img
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              src="/logo.png"
+              alt="Readr Logo"
+              className="w-8 h-8 md:w-10 md:h-10 object-contain mix-blend-multiply dark:mix-blend-screen dark:invert grayscale contrast-125"
+            />
         )}
-        <motion.h1 
+        <motion.h1
           className="text-3xl md:text-6xl font-display leading-none flex text-sepia"
           initial="hidden"
           animate="visible"
@@ -192,7 +205,7 @@ function Header({ setView, currentView, t, darkMode, setDarkMode }: { setView: (
         </motion.h1>
       </div>
 
-      <button 
+      <button
         onClick={() => setDarkMode(!darkMode)}
         className="w-10 h-10 rounded-xl parchment-sheet border border-sepia/20 shadow-sm flex items-center justify-center text-sepia hover:bg-sepia/10 transition-all active:scale-95"
       >
@@ -202,20 +215,14 @@ function Header({ setView, currentView, t, darkMode, setDarkMode }: { setView: (
   );
 }
 
-function DashboardView({ stats, t, setView, analysisTarget, partnerGender }: { stats: ChatStats | null, t: any, setView: (v: ViewState) => void, analysisTarget: 'self' | 'partner', partnerGender: 'Man' | 'Women', key?: string }) {
+function DashboardView({ stats, t, setView, analysisTarget, partnerGender, lang }: { stats: ChatStats | null, t: any, setView: (v: ViewState) => void, analysisTarget: 'self' | 'partner', partnerGender: 'Man' | 'Women', lang: Language, key?: string }) {
   const me = analysisTarget === 'self' ? stats?.participants[0] : (stats?.participants[1] || stats?.participants[0]);
   const partner = analysisTarget === 'self' ? (stats?.participants[1] || "Partner") : stats?.participants[0];
 
   const persona = stats && partner ? getPersona(stats, partner as string, partnerGender) : null;
 
-  const recentChats = [
-    { name: "Julianne Moore", date: "Bugün", emoji: "✨", color: "bg-sepia/10" },
-    { name: "Mark Zuckerberg", date: "2 gün önce", emoji: "⚡", color: "bg-ink/10" },
-    { name: "Bilinmeyen Kullanıcı", date: "1 hafta önce", emoji: "🌙", color: "bg-ink/5" },
-  ];
-
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
@@ -226,7 +233,7 @@ function DashboardView({ stats, t, setView, analysisTarget, partnerGender }: { s
           <span className="text-[10px] font-bold text-sepia uppercase tracking-[0.4em]">{t.dashboard.title}</span>
           <h2 className="text-4xl md:text-6xl font-display text-sepia tracking-tighter">Dashboard</h2>
         </div>
-        <button 
+        <button
           onClick={() => setView('upload')}
           className="w-full md:w-auto bg-sepia text-parchment px-8 py-4 rounded-2xl font-display font-bold uppercase tracking-widest shadow-lg shadow-sepia/20 hover:-translate-y-1 hover:shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2"
         >
@@ -241,18 +248,18 @@ function DashboardView({ stats, t, setView, analysisTarget, partnerGender }: { s
         <div className="md:col-span-2 parchment-sheet border border-sepia/20 rounded-[2rem] p-4 md:p-8 shadow-xl relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-40 h-40 bg-sepia/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
           <div className="relative z-10 flex flex-row items-center gap-4 md:gap-8">
-            <div className="w-16 h-16 md:w-32 md:h-32 rounded-2xl md:rounded-3xl overflow-hidden border border-sepia/20 bg-parchment shadow-lg rotate-2 hover:rotate-0 transition-all duration-500 shrink-0">
-              <img 
-                src={persona ? `/${persona.image}` : "/peer.png"} 
-                alt="Partner Persona" 
-                className="w-full h-full object-cover filter contrast-125 grayscale hover:grayscale-0 transition-all duration-700 mix-blend-multiply" 
+            <div className="w-24 h-24 md:w-48 md:h-48 rounded-2xl md:rounded-[2rem] overflow-hidden border border-sepia/20 bg-parchment shadow-lg rotate-2 hover:rotate-0 transition-all duration-500 shrink-0">
+              <img
+                src={persona ? `/${persona.image}` : "/peer.png"}
+                alt="Partner Persona"
+                className="w-full h-full object-cover transition-all duration-700"
               />
             </div>
             <div className="flex-1 text-left space-y-1 md:space-y-2 min-w-0">
-              <p className="text-[9px] md:text-[10px] font-display font-bold text-gold uppercase tracking-widest truncate">{persona ? persona.type : t.dashboard.personaTitle}</p>
+              <p className="text-[9px] md:text-[10px] font-display font-bold text-gold uppercase tracking-widest truncate">{persona ? persona.label[lang === 'en' ? 'en' : 'tr'] : t.dashboard.personaTitle}</p>
               <h3 className="text-2xl md:text-4xl font-display text-sepia leading-none truncate">{partner || "Partner"}</h3>
               <p className="text-xs text-ink/70 font-serif italic line-clamp-2">
-                {persona ? persona.description[t.appName === "Readr" ? "en" : "tr"] : t.dashboard.personaDesc}
+                {persona ? persona.description[lang === 'en' ? 'en' : 'tr'] : t.dashboard.personaDesc}
               </p>
             </div>
           </div>
@@ -261,54 +268,23 @@ function DashboardView({ stats, t, setView, analysisTarget, partnerGender }: { s
         {/* Mini Stats */}
         <div className="grid grid-cols-2 md:grid-rows-2 md:grid-cols-1 gap-4 md:gap-6">
           <div className="parchment-sheet border border-sepia/20 rounded-[1.5rem] md:rounded-[2rem] p-4 md:p-6 shadow-xl flex items-center gap-3 md:gap-4 group">
-             <div className="w-10 h-10 md:w-12 md:h-12 bg-sepia/10 text-sepia rounded-xl md:rounded-2xl flex items-center justify-center text-lg shrink-0 group-hover:scale-110 transition-transform">
-               💬
-             </div>
-             <div>
-               <p className="text-[8px] md:text-[9px] font-bold text-sepia/60 uppercase tracking-widest">{t.dashboard.analyzedMessages}</p>
-               <p className="text-xl md:text-2xl font-display text-sepia mt-0.5">{stats ? stats.totalMessages : 0}</p>
-             </div>
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-sepia/10 text-sepia rounded-xl md:rounded-2xl flex items-center justify-center text-lg shrink-0 group-hover:scale-110 transition-transform">
+              💬
+            </div>
+            <div>
+              <p className="text-[8px] md:text-[9px] font-bold text-sepia/60 uppercase tracking-widest">{t.dashboard.analyzedMessages}</p>
+              <p className="text-xl md:text-2xl font-display text-sepia mt-0.5">{stats ? stats.totalMessages : 0}</p>
+            </div>
           </div>
           <div className="parchment-sheet border border-sepia/20 rounded-[1.5rem] md:rounded-[2rem] p-4 md:p-6 shadow-xl flex items-center gap-3 md:gap-4 group">
-             <div className="w-10 h-10 md:w-12 md:h-12 bg-sepia/10 text-sepia rounded-xl md:rounded-2xl flex items-center justify-center text-lg shrink-0 group-hover:scale-110 transition-transform">
-               😊
-             </div>
-             <div>
-               <p className="text-[8px] md:text-[9px] font-bold text-sepia/60 uppercase tracking-widest">{t.dashboard.favoriteEmoji}</p>
-               <p className="text-xl md:text-2xl font-display text-sepia mt-0.5">😂</p>
-             </div>
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-sepia/10 text-sepia rounded-xl md:rounded-2xl flex items-center justify-center text-lg shrink-0 group-hover:scale-110 transition-transform">
+              😊
+            </div>
+            <div>
+              <p className="text-[8px] md:text-[9px] font-bold text-sepia/60 uppercase tracking-widest">{t.dashboard.favoriteEmoji}</p>
+              <p className="text-xl md:text-2xl font-display text-sepia mt-0.5">😂</p>
+            </div>
           </div>
-        </div>
-      </section>
-
-      <section className="space-y-6">
-        <h3 className="text-[10px] font-bold text-sepia uppercase tracking-[0.4em]">{t.dashboard.recentChats}</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {recentChats.map((chat, i) => (
-            <motion.div 
-              key={i}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.1 }}
-              className="parchment-sheet border border-sepia/20 rounded-[2rem] p-5 md:p-8 shadow-xl group hover:bg-sepia/5 transition-colors flex justify-between items-center"
-            >
-              <div className="flex items-center gap-4 md:gap-6">
-                <div className={cn("w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center text-xl md:text-2xl border border-sepia/20", chat.color)}>
-                  {chat.emoji}
-                </div>
-                <div>
-                  <h4 className="text-xl md:text-2xl font-display text-sepia">{chat.name}</h4>
-                  <p className="text-[9px] md:text-[10px] font-bold text-sepia/40 uppercase tracking-widest mt-1">{t.dashboard.lastAnalyzed} {chat.date}</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => setView('insights')}
-                className="w-10 h-10 md:w-12 md:h-12 rounded-xl border border-sepia/20 flex items-center justify-center group-hover:bg-sepia group-hover:border-sepia group-hover:text-parchment transition-all shadow-sm group-hover:shadow-sepia/20 group-hover:scale-105"
-              >
-                <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
-              </button>
-            </motion.div>
-          ))}
         </div>
       </section>
     </motion.div>
@@ -327,7 +303,7 @@ function WelcomeView({ onStart, t }: { onStart: () => void, t: any, key?: string
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
@@ -335,12 +311,12 @@ function WelcomeView({ onStart, t }: { onStart: () => void, t: any, key?: string
     >
       <div className="relative w-72 h-72 flex items-center justify-center mb-4">
         <div className="absolute inset-0 bg-sepia/20 rounded-full blur-3xl animate-pulse"></div>
-        <motion.div 
+        <motion.div
           animate={{ y: [0, -10, 0] }}
           transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
           className="relative z-10 w-64 h-64 rounded-[3rem] overflow-hidden shadow-2xl border-4 border-sepia/20 bg-parchment"
         >
-          <img src="/character.png" alt="3D Tech Character" className="w-full h-full object-cover mix-blend-multiply grayscale contrast-125" />
+          <img src="/character.png" alt="3D Tech Character" className="w-full h-full object-cover" />
         </motion.div>
       </div>
 
@@ -355,19 +331,19 @@ function WelcomeView({ onStart, t }: { onStart: () => void, t: any, key?: string
 
       <div className="w-full max-w-[300px] pt-4">
         <div className="relative w-full h-[68px] parchment-sheet rounded-full shadow-inner border border-sepia/20 flex items-center overflow-hidden">
-          <motion.div 
-            className="absolute left-0 top-0 bottom-0 bg-sepia rounded-full" 
-            style={{ width: useTransform(x, (val) => val + 64), opacity: bgOpacity }} 
+          <motion.div
+            className="absolute left-0 top-0 bottom-0 bg-sepia rounded-full"
+            style={{ width: useTransform(x, (val) => val + 64), opacity: bgOpacity }}
           />
-          
-          <motion.span 
+
+          <motion.span
             className="absolute w-full text-center text-xs font-display font-bold uppercase tracking-[0.2em] text-sepia/40 pointer-events-none pl-12"
             style={{ opacity }}
           >
             {t.welcome.getStarted}
             <span className="inline-block ml-2 opacity-50 animate-pulse">&gt;&gt;&gt;</span>
           </motion.span>
-          
+
           <motion.div
             drag="x"
             dragConstraints={{ left: 0, right: 226 }}
@@ -393,7 +369,7 @@ function WelcomeView({ onStart, t }: { onStart: () => void, t: any, key?: string
 
 function LoginView({ onLogin, t }: { onLogin: () => void, t: any, key?: string }) {
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.05 }}
@@ -408,19 +384,19 @@ function LoginView({ onLogin, t }: { onLogin: () => void, t: any, key?: string }
         <div className="absolute top-0 right-0 w-32 h-32 bg-sepia/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
         <div className="space-y-6 relative z-10">
           <div className="grid grid-cols-1 gap-3">
-            <button 
+            <button
               onClick={onLogin}
               className="flex items-center justify-center gap-3 w-full py-4 px-4 bg-parchment text-sepia font-bold border border-sepia/20 rounded-2xl hover:bg-sepia/5 transition-all active:scale-[0.98]"
             >
-              <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" alt="Google" className="w-5 h-5 object-contain mix-blend-multiply grayscale" />
+              <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" alt="Google" className="w-5 h-5 object-contain mix-blend-multiply dark:mix-blend-screen dark:invert grayscale" />
               <span className="font-display uppercase tracking-widest text-xs">{t.login.google}</span>
             </button>
-            <button 
+            <button
               onClick={onLogin}
               className="flex items-center justify-center gap-3 w-full py-4 px-4 bg-sepia text-parchment font-bold rounded-2xl hover:opacity-90 transition-opacity active:scale-[0.98]"
             >
               <div className="w-5 h-5 bg-parchment rounded-full flex items-center justify-center">
-                 <span className="text-[10px] text-sepia font-bold">A</span>
+                <span className="text-[10px] text-sepia font-bold">A</span>
               </div>
               <span className="font-display uppercase tracking-widest text-xs">{t.login.apple}</span>
             </button>
@@ -431,23 +407,23 @@ function LoginView({ onLogin, t }: { onLogin: () => void, t: any, key?: string }
   );
 }
 
-function UploadView({ 
-  onUpload, 
-  t, 
-  analysisTarget, 
-  setAnalysisTarget, 
+function UploadView({
+  onUpload,
+  t,
+  analysisTarget,
+  setAnalysisTarget,
   partnerGender,
   setPartnerGender,
-  lang 
-}: { 
-  onUpload: (stats: ChatStats) => void, 
-  t: any, 
-  analysisTarget: 'self' | 'partner', 
-  setAnalysisTarget: (v: 'self'|'partner') => void, 
+  lang
+}: {
+  onUpload: (stats: ChatStats) => void,
+  t: any,
+  analysisTarget: 'self' | 'partner',
+  setAnalysisTarget: (v: 'self' | 'partner') => void,
   partnerGender: 'Man' | 'Women',
   setPartnerGender: (v: 'Man' | 'Women') => void,
-  lang: string, 
-  key?: string 
+  lang: string,
+  key?: string
 }) {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -457,9 +433,13 @@ function UploadView({
 
     const reader = new FileReader();
     reader.onload = async (event) => {
-      const content = event.target?.result as string;
-      const stats = await parseChatFile(content);
-      onUpload(stats);
+      try {
+        const content = event.target?.result as string;
+        const stats = await parseChatFile(content);
+        onUpload(stats);
+      } catch (error: any) {
+        toast.error(error.message || 'Dosya okunurken bir hata oluştu.');
+      }
     };
     reader.readAsText(file);
   };
@@ -469,20 +449,20 @@ function UploadView({
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       className="flex flex-col items-center max-w-2xl mx-auto space-y-16 py-10"
     >
-      <input 
-        type="file" 
-        ref={fileInputRef} 
-        onChange={handleFileChange} 
-        accept=".txt" 
-        className="hidden" 
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept=".txt"
+        className="hidden"
       />
-      
+
       <div className="text-center space-y-4 px-4">
         <h2 className="text-4xl md:text-6xl font-display text-sepia tracking-tight">{t.upload.title}</h2>
         <p className="text-ink/70 max-w-md mx-auto leading-relaxed italic text-sm md:text-base">
@@ -491,7 +471,7 @@ function UploadView({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-        <button 
+        <button
           onClick={() => setAnalysisTarget('self')}
           className={cn(
             "relative h-48 rounded-[2rem] border-4 transition-all overflow-hidden flex flex-col items-center justify-center group",
@@ -499,7 +479,7 @@ function UploadView({
           )}
         >
           <div className="absolute inset-0 bg-sepia/40 z-10 group-hover:bg-sepia/30 transition-colors"></div>
-          <img src="/self.png" alt="Self Analysis" className="absolute inset-0 w-full h-full object-cover z-0 grayscale group-hover:grayscale-0 transition-all duration-500 mix-blend-multiply" />
+          <img src="/self.png" alt="Self Analysis" className="absolute inset-0 w-full h-full object-cover z-0 transition-all duration-500" />
           <div className="relative z-20 flex flex-col items-center gap-3">
             <div className={cn("p-3 rounded-2xl backdrop-blur-md bg-white/20 border border-white/20 transition-colors", analysisTarget === 'self' ? "text-white" : "text-white/80")}>
               <User className="w-8 h-8" />
@@ -510,7 +490,7 @@ function UploadView({
           </div>
         </button>
 
-        <button 
+        <button
           onClick={() => setAnalysisTarget('partner')}
           className={cn(
             "relative h-48 rounded-[2rem] border-4 transition-all overflow-hidden flex flex-col items-center justify-center group",
@@ -518,7 +498,7 @@ function UploadView({
           )}
         >
           <div className="absolute inset-0 bg-sepia/40 z-10 group-hover:bg-sepia/30 transition-colors"></div>
-          <img src="/peer.png" alt="Partner Analysis" className="absolute inset-0 w-full h-full object-cover z-0 grayscale group-hover:grayscale-0 transition-all duration-500 mix-blend-multiply" />
+          <img src="/peer.png" alt="Partner Analysis" className="absolute inset-0 w-full h-full object-cover z-0 transition-all duration-500" />
           <div className="relative z-20 flex flex-col items-center gap-3">
             <div className={cn("p-3 rounded-2xl backdrop-blur-md bg-white/20 border border-white/20 transition-colors", analysisTarget === 'partner' ? "text-white" : "text-white/80")}>
               <User className="w-8 h-8" />
@@ -532,7 +512,7 @@ function UploadView({
 
       <AnimatePresence>
         {analysisTarget === 'partner' && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -542,7 +522,7 @@ function UploadView({
               {lang === 'tr' ? 'KARŞI TARAFIN CİNSİYETİ' : "PARTNER'S GENDER"}
             </p>
             <div className="flex gap-4">
-              <button 
+              <button
                 onClick={() => setPartnerGender('Man')}
                 className={cn(
                   "px-8 py-3 rounded-2xl font-display font-bold uppercase tracking-widest transition-all",
@@ -551,7 +531,7 @@ function UploadView({
               >
                 {lang === 'tr' ? 'ERKEK' : 'MAN'}
               </button>
-              <button 
+              <button
                 onClick={() => setPartnerGender('Women')}
                 className={cn(
                   "px-8 py-3 rounded-2xl font-display font-bold uppercase tracking-widest transition-all",
@@ -565,7 +545,7 @@ function UploadView({
         )}
       </AnimatePresence>
 
-      <div 
+      <div
         onClick={triggerFileSelect}
         className="w-full parchment-sheet border-2 border-dashed border-sepia/30 rounded-[3rem] p-16 flex flex-col items-center justify-center transition-all hover:border-sepia/50 hover:bg-sepia/5 group cursor-pointer shadow-xl hover:-translate-y-1"
       >
@@ -575,6 +555,26 @@ function UploadView({
         <h3 className="text-3xl font-display text-sepia mb-4">{t.upload.selectTitle}</h3>
         <p className="text-[10px] font-display font-bold uppercase tracking-widest opacity-60 text-sepia">{t.upload.selectSubtitle}</p>
       </div>
+
+      <button
+        onClick={async () => {
+          try {
+            const demoText = `[24.10.2023 21:44:20] Baran: Selam nasılsın?
+[24.10.2023 21:45:10] Ayşe: İyiyim sen nasılsın? 😂
+[24.10.2023 21:45:15] Ayşe: Görüşmeyeli uzun zaman oldu
+[24.10.2023 21:48:20] Baran: Aynen öyle. Müsait misin akşam?
+[24.10.2023 22:15:30] Ayşe: Olur, haberleşiriz.
+[24.10.2023 22:20:00] Baran: Süper!`;
+            const stats = await parseChatFile(demoText);
+            onUpload(stats);
+          } catch (error: any) {
+            toast.error(error.message);
+          }
+        }}
+        className="text-[10px] font-display font-bold text-sepia/50 uppercase tracking-[0.2em] hover:text-sepia transition-colors underline underline-offset-4"
+      >
+        {lang === 'tr' ? 'Veya Demo İncele' : 'Or Try Demo'}
+      </button>
     </motion.div>
   );
 }
@@ -584,7 +584,7 @@ function ProcessingView({ progress, t }: { progress: number, t: any, key?: strin
   const dashOffset = dashArray - (dashArray * progress) / 100;
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -595,14 +595,14 @@ function ProcessingView({ progress, t }: { progress: number, t: any, key?: strin
           <div className="relative flex items-center justify-center mb-10">
             <svg className="w-52 h-52">
               <circle className="text-sepia/5 stroke-current" cx="104" cy="104" r="80" strokeWidth="1" fill="transparent" />
-              <motion.circle 
-                className="text-sepia stroke-current" 
-                cx="104" cy="104" r="80" 
-                strokeWidth="12" 
+              <motion.circle
+                className="text-sepia stroke-current"
+                cx="104" cy="104" r="80"
+                strokeWidth="12"
                 strokeDasharray={dashArray}
                 animate={{ strokeDashoffset: dashOffset }}
-                strokeLinecap="round" 
-                fill="transparent" 
+                strokeLinecap="round"
+                fill="transparent"
               />
             </svg>
             <div className="absolute flex flex-col items-center">
@@ -616,21 +616,21 @@ function ProcessingView({ progress, t }: { progress: number, t: any, key?: strin
   );
 }
 
-function ComparisonCard({ 
-  title, 
-  meValue, 
-  partnerValue, 
-  unit, 
-  t, 
+function ComparisonCard({
+  title,
+  meValue,
+  partnerValue,
+  unit,
+  t,
   inverse = false,
   emoji,
   me: meName,
   partner: partnerName,
-}: { 
-  title: string, 
-  meValue: number, 
-  partnerValue: number, 
-  unit: string, 
+}: {
+  title: string,
+  meValue: number,
+  partnerValue: number,
+  unit: string,
   t: any,
   inverse?: boolean,
   emoji: string,
@@ -639,7 +639,7 @@ function ComparisonCard({
 }) {
   const meColor = "var(--color-sepia)";
   const partnerColor = "var(--color-gold)";
-  
+
   // Normalized values for the donut chart
   const total = meValue + partnerValue;
   const data = [
@@ -653,7 +653,7 @@ function ComparisonCard({
   const meIsHigher = inverse ? meValue < partnerValue : meValue > partnerValue;
 
   return (
-    <motion.div 
+    <motion.div
       whileHover={{ y: -5 }}
       className="parchment-sheet border border-sepia/20 rounded-[2rem] p-8 space-y-6 shadow-xl relative overflow-hidden group transition-all"
     >
@@ -666,19 +666,19 @@ function ComparisonCard({
           <h5 className="text-xl md:text-2xl font-display text-sepia">{mePercent}% vs {partnerPercent}%</h5>
         </div>
         <div className="text-right">
-           <p className="text-[9px] md:text-[10px] font-bold text-gold uppercase tracking-widest font-display">{meIsHigher ? "PROMINENT" : "RECEPTIVE"}</p>
+          <p className="text-[9px] md:text-[10px] font-bold text-gold uppercase tracking-widest font-display">{meIsHigher ? t.insights.comparison.prominent : t.insights.comparison.receptive}</p>
         </div>
       </div>
 
-      <div className="relative h-40 flex items-center justify-center">
+      <div className="relative h-56 flex items-center justify-center">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={data}
               cx="50%"
               cy="50%"
-              innerRadius={50}
-              outerRadius={70}
+              innerRadius={80}
+              outerRadius={105}
               paddingAngle={8}
               dataKey="value"
               stroke="none"
@@ -692,7 +692,7 @@ function ComparisonCard({
           </PieChart>
         </ResponsiveContainer>
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <span className="text-3xl font-display text-sepia">{unit}</span>
+          <span className="text-4xl md:text-5xl font-display text-sepia">{unit}</span>
         </div>
       </div>
 
@@ -723,9 +723,31 @@ function ComparisonCard({
 function InsightsView({ t, stats, lang, analysisTarget, partnerGender }: { t: any, stats: ChatStats | null, lang: Language, analysisTarget: 'self' | 'partner', partnerGender: 'Man' | 'Women', key?: string }) {
   const [synthesis, setSynthesis] = useState<string[]>([]);
   const [aiLoading, setAiLoading] = useState(true);
+  const printRef = React.useRef<HTMLDivElement>(null);
 
   const me = stats ? (analysisTarget === 'self' ? stats.participants[0] : (stats.participants[1] || stats.participants[0])) : '';
   const partner = stats ? (analysisTarget === 'self' ? (stats.participants[1] || "Partner") : stats.participants[0]) : '';
+
+  const handleShare = async () => {
+    if (!printRef.current) return;
+    try {
+      const toastId = toast.loading(lang === 'tr' ? 'Görsel hazırlanıyor...' : 'Preparing image...');
+      const canvas = await html2canvas(printRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#f3ece1', // parchment
+      });
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = `insightful-${partner}-analysis.png`;
+      link.href = dataUrl;
+      link.click();
+      toast.dismiss(toastId);
+      toast.success(lang === 'tr' ? 'Analiz başarıyla kaydedildi!' : 'Analysis saved successfully!');
+    } catch (err) {
+      toast.error(lang === 'tr' ? 'Kaydedilirken bir hata oluştu.' : 'Error saving analysis.');
+    }
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -768,28 +790,37 @@ function InsightsView({ t, stats, lang, analysisTarget, partnerGender }: { t: an
   })).sort((a, b) => parseInt(a.name) - parseInt(b.name));
 
   return (
-    <motion.div 
+    <motion.div
+      ref={printRef}
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="space-y-12 md:space-y-16 py-4"
+      className="space-y-12 md:space-y-16 py-4 px-2 relative pb-20"
     >
       <section className="space-y-6 md:space-y-4 flex flex-col md:flex-row justify-between items-center md:items-end gap-6 text-center md:text-left">
         <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
-          <div className="w-32 h-32 md:w-40 md:h-40 rounded-3xl overflow-hidden border border-sepia/20 bg-parchment shadow-2xl rotate-[-2deg] shrink-0">
-             <img 
-                src={persona ? `/${persona.image}` : "/peer.png"} 
-                alt="Partner Persona" 
-                className="w-full h-full object-cover filter contrast-125 grayscale mix-blend-multiply" 
-              />
+          <div className="w-40 h-40 md:w-64 md:h-64 rounded-3xl md:rounded-[2.5rem] overflow-hidden border border-sepia/20 bg-parchment shadow-2xl rotate-[-2deg] shrink-0">
+            <img
+              src={persona ? `/${persona.image}` : "/peer.png"}
+              alt="Partner Persona"
+              className="w-full h-full object-cover"
+            />
           </div>
           <div className="space-y-2">
-            <span className="text-[10px] font-bold text-sepia uppercase tracking-[0.4em] font-display">{persona ? persona.type : t.insights.category} / {new Date().getFullYear()}</span>
+            <span className="text-[10px] font-bold text-sepia uppercase tracking-[0.4em] font-display">{persona ? persona.label[lang === 'en' ? 'en' : 'tr'] : t.insights.category} / {new Date().getFullYear()}</span>
             <h2 className="text-4xl md:text-7xl font-display text-sepia tracking-tighter leading-none">{t.insights.headline} {partner}</h2>
             <div className="h-1 w-24 md:w-32 bg-sepia mt-4 mx-auto md:mx-0" />
+            {persona && (
+              <p className="text-sm md:text-base text-ink/70 font-serif italic mt-4 max-w-md mx-auto md:mx-0 leading-relaxed">
+                {persona.description[lang === 'en' ? 'en' : 'tr']}
+              </p>
+            )}
           </div>
         </div>
-        <button className="w-full md:w-auto bg-sepia text-parchment px-8 py-4 rounded-2xl font-display font-bold uppercase tracking-widest hover:-translate-y-1 hover:shadow-lg hover:shadow-sepia/30 active:scale-95 transition-all flex items-center justify-center gap-2">
+        <button
+          onClick={handleShare}
+          className="w-full md:w-auto bg-sepia text-parchment px-8 py-4 rounded-2xl font-display font-bold uppercase tracking-widest hover:-translate-y-1 hover:shadow-lg hover:shadow-sepia/30 active:scale-95 transition-all flex items-center justify-center gap-2"
+        >
           📤 {t.insights.shareToStory}
         </button>
       </section>
@@ -862,10 +893,10 @@ function InsightsView({ t, stats, lang, analysisTarget, partnerGender }: { t: an
           <ComparisonCard title={t.insights.comparison.wordCount} meValue={meMetrics.words} partnerValue={partnerMetrics.words} unit={t.insights.comparison.metrics.words} emoji="📝" t={t} me={me} partner={partner} />
           <ComparisonCard title={t.insights.comparison.responseTime} meValue={meMetrics.responseTime} partnerValue={partnerMetrics.responseTime} unit={t.insights.comparison.metrics.minutes} emoji="⏱️" inverse t={t} me={me} partner={partner} />
           <ComparisonCard title={t.insights.comparison.emojis} meValue={meMetrics.emojis} partnerValue={partnerMetrics.emojis} unit={t.insights.comparison.metrics.emojis} emoji="😊" t={t} me={me} partner={partner} />
-          <ComparisonCard title={t.insights.comparison.doubleTexting} meValue={meMetrics.doubleText} partnerValue={partnerMetrics.doubleText} unit="Times" emoji="⏭️" inverse t={t} me={me} partner={partner} />
-          <ComparisonCard title={t.insights.comparison.messages} meValue={meMetrics.messages} partnerValue={partnerMetrics.messages} unit="Msg" emoji="💬" t={t} me={me} partner={partner} />
+          <ComparisonCard title={t.insights.comparison.doubleTexting} meValue={meMetrics.doubleText} partnerValue={partnerMetrics.doubleText} unit={t.insights.comparison.metrics.times} emoji="⏭️" inverse t={t} me={me} partner={partner} />
+          <ComparisonCard title={t.insights.comparison.messages} meValue={meMetrics.messages} partnerValue={partnerMetrics.messages} unit={t.insights.comparison.metrics.msg} emoji="💬" t={t} me={me} partner={partner} />
         </div>
-        
+
         {/* Activity Chart */}
         <div className="parchment-sheet border border-sepia/20 rounded-3xl p-6 md:p-8 shadow-xl mt-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-6">
@@ -889,28 +920,28 @@ function InsightsView({ t, stats, lang, analysisTarget, partnerGender }: { t: an
               <BarChart data={chartData} barCategoryGap="20%">
                 <defs>
                   <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--color-sepia)" stopOpacity={0.9}/>
-                    <stop offset="100%" stopColor="var(--color-sepia)" stopOpacity={0.15}/>
+                    <stop offset="0%" stopColor="var(--color-sepia)" stopOpacity={0.9} />
+                    <stop offset="100%" stopColor="var(--color-sepia)" stopOpacity={0.15} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="var(--color-sepia)" opacity={0.08} />
-                <XAxis 
-                  dataKey="name" 
-                  axisLine={false} 
-                  tickLine={false} 
+                <XAxis
+                  dataKey="name"
+                  axisLine={false}
+                  tickLine={false}
                   interval={2}
                   tick={{ fontSize: 9, fontWeight: 'bold', fill: 'var(--color-sepia)', opacity: 0.6, fontFamily: 'Cinzel' }}
                 />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
                   width={30}
                   tick={{ fontSize: 9, fontWeight: 'bold', fill: 'var(--color-sepia)', opacity: 0.6, fontFamily: 'Cinzel' }}
                 />
-                <Tooltip 
+                <Tooltip
                   cursor={{ fill: 'var(--color-sepia)', opacity: 0.04 }}
-                  contentStyle={{ 
-                    borderRadius: '0.75rem', 
+                  contentStyle={{
+                    borderRadius: '0.75rem',
                     backgroundColor: 'var(--color-parchment)',
                     border: '1px solid var(--color-sepia)',
                     boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
@@ -933,43 +964,43 @@ function InsightsView({ t, stats, lang, analysisTarget, partnerGender }: { t: an
         <h4 className="text-[10px] font-bold text-sepia uppercase tracking-[0.3em] font-display">{t.insights.signaturesTitle}</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {[
-            { 
-              emoji: '🌙', 
-              label: t.insights.signatures.nightOwl.label, 
-              title: t.insights.signatures.nightOwl.title, 
-              desc: (stats.hourlyActivity[23] || 0) + (stats.hourlyActivity[0] || 0) > stats.totalMessages * 0.2 
+            {
+              emoji: '🌙',
+              label: t.insights.signatures.nightOwl.label,
+              title: t.insights.signatures.nightOwl.title,
+              desc: (stats.hourlyActivity[23] || 0) + (stats.hourlyActivity[0] || 0) > stats.totalMessages * 0.2
                 ? (lang === 'tr' ? "Gece saatlerinde oldukça aktifsiniz." : "Highly active during night hours.")
                 : (lang === 'tr' ? "Düzenli bir uyku rutininiz var gibi görünüyor." : "You seem to have a regular sleep routine.")
             },
-            { 
-              emoji: '⚡', 
-              label: t.insights.signatures.quickResponder.label, 
-              title: t.insights.signatures.quickResponder.title, 
-              desc: meMetrics.responseTime < 10 
+            {
+              emoji: '⚡',
+              label: t.insights.signatures.quickResponder.label,
+              title: t.insights.signatures.quickResponder.title,
+              desc: meMetrics.responseTime < 10
                 ? (lang === 'tr' ? "Mesajlara ışık hızında yanıt veriyorsunuz." : "You respond to messages at lightning speed.")
                 : (lang === 'tr' ? "Yanıt vermeden önce düşünmeyi tercih ediyorsunuz." : "You prefer to reflect before responding.")
             },
-            { 
-              emoji: '❓', 
-              label: t.insights.signatures.questioner.label, 
-              title: t.insights.signatures.questioner.title, 
+            {
+              emoji: '❓',
+              label: t.insights.signatures.questioner.label,
+              title: t.insights.signatures.questioner.title,
               desc: meMetrics.words / meMetrics.messages > 15
                 ? (lang === 'tr' ? "Uzun ve açıklayıcı cümleler kuruyorsunuz." : "You write long and descriptive sentences.")
                 : (lang === 'tr' ? "Kısa ve öz bir iletişim tarzınız var." : "You have a concise communication style.")
             },
-            { 
-              emoji: '💬', 
-              label: t.insights.signatures.starter.label, 
-              title: t.insights.signatures.starter.title, 
+            {
+              emoji: '💬',
+              label: t.insights.signatures.starter.label,
+              title: t.insights.signatures.starter.title,
               desc: stats.doubleTextingCount[me] > 5
                 ? (lang === 'tr' ? "Sohbeti başlatan ve sürüren taraf sizsiniz." : "You are the one starting and maintaining the chat.")
                 : (lang === 'tr' ? "Dengeli bir katılım sergiliyorsunuz." : "you show balanced participation.")
             },
           ].map((item, i) => (
-            <motion.div 
-              key={i} 
-              initial={{ opacity: 0, y: 10 }} 
-              animate={{ opacity: 1, y: 0 }} 
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
               className="parchment-sheet border border-sepia/20 rounded-3xl p-6 flex items-start gap-6 hover:-translate-y-1 hover:shadow-xl transition-all group"
             >
@@ -1003,6 +1034,12 @@ function InsightsView({ t, stats, lang, analysisTarget, partnerGender }: { t: an
           </button>
         </div>
       </section>
+
+      {/* Watermark for sharing */}
+      <div className="absolute bottom-4 right-4 flex items-center gap-2 opacity-30">
+        <img src="/logo.png" alt="Logo" className="w-6 h-6 grayscale mix-blend-multiply dark:mix-blend-screen dark:invert" />
+        <span className="font-display font-bold uppercase tracking-widest text-xs text-sepia">Insightful</span>
+      </div>
     </motion.div>
   );
 }
@@ -1010,7 +1047,7 @@ function InsightsView({ t, stats, lang, analysisTarget, partnerGender }: { t: an
 function ProfileView({ setView, t, lang, setLang, darkMode, setDarkMode }: { setView: (v: ViewState) => void, t: any, lang: Language, setLang: (l: Language) => void, darkMode: boolean, setDarkMode: (v: boolean) => void, key?: string }) {
   const [notifications, setNotifications] = useState(true);
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
@@ -1021,11 +1058,11 @@ function ProfileView({ setView, t, lang, setLang, darkMode, setDarkMode }: { set
         <div className="absolute top-0 right-0 w-64 h-64 bg-sepia/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
         <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
           <div className="relative">
-            <div className="w-32 h-32 rounded-3xl overflow-hidden border-2 border-sepia rotate-3 hover:rotate-0 transition-transform duration-500 shadow-xl bg-parchment">
-              <img 
-                src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=256&auto=format&fit=crop" 
-                alt="Profile" 
-                className="w-full h-full object-cover filter grayscale contrast-125 mix-blend-multiply hover:grayscale-0 transition-all duration-700"
+            <div className="w-40 h-40 rounded-[2rem] overflow-hidden border-2 border-sepia rotate-3 hover:rotate-0 transition-transform duration-500 shadow-xl bg-parchment">
+              <img
+                src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=256&auto=format&fit=crop"
+                alt="Profile"
+                className="w-full h-full object-cover transition-all duration-700"
               />
             </div>
             <div className="absolute -bottom-2 -right-2 bg-sepia text-parchment p-2 rounded-xl shadow-lg border-2 border-parchment">
@@ -1033,7 +1070,7 @@ function ProfileView({ setView, t, lang, setLang, darkMode, setDarkMode }: { set
             </div>
           </div>
           <div className="text-center md:text-left space-y-2">
-            <h2 className="text-5xl font-display text-sepia tracking-tighter">Julianne Moore</h2>
+            <h2 className="text-5xl font-display text-sepia tracking-tighter">Baran Demirtas</h2>
             <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-4">
               <button className="flex items-center gap-2 px-4 py-2 bg-sepia/5 rounded-xl text-[10px] font-display font-bold text-sepia hover:bg-sepia/10 transition-colors uppercase tracking-widest">
                 <Lock className="w-4 h-4" />
@@ -1049,7 +1086,7 @@ function ProfileView({ setView, t, lang, setLang, darkMode, setDarkMode }: { set
       <section className="space-y-6">
         <h3 className="text-[10px] font-bold text-sepia uppercase tracking-[0.4em] opacity-40 px-2 font-display">{t.profile.configTitle}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
+
           {/* Language Selection Tile */}
           <div className="p-8 parchment-sheet rounded-3xl border border-sepia/20 flex items-center justify-between group hover:border-sepia/40 transition-colors shadow-xl">
             <div className="flex items-center gap-4">
@@ -1062,13 +1099,13 @@ function ProfileView({ setView, t, lang, setLang, darkMode, setDarkMode }: { set
               </div>
             </div>
             <div className="flex gap-2 p-1.5 bg-sepia/5 rounded-xl border border-sepia/10">
-              <button 
+              <button
                 onClick={() => setLang('en')}
                 className={cn("px-4 py-2 rounded-lg text-[9px] font-bold uppercase transition-all font-display tracking-widest", lang === 'en' ? 'bg-sepia shadow-md text-parchment' : 'text-sepia/40')}
               >
                 EN
               </button>
-              <button 
+              <button
                 onClick={() => setLang('tr')}
                 className={cn("px-4 py-2 rounded-lg text-[9px] font-bold uppercase transition-all font-display tracking-widest", lang === 'tr' ? 'bg-sepia shadow-md text-parchment' : 'text-sepia/40')}
               >
@@ -1091,7 +1128,7 @@ function ProfileView({ setView, t, lang, setLang, darkMode, setDarkMode }: { set
             <ChevronRight className="w-5 h-5 text-sepia/20 group-hover:translate-x-1 transition-transform" />
           </button>
 
-          <button 
+          <button
             onClick={() => setNotifications(!notifications)}
             className="p-8 parchment-sheet rounded-3xl border border-sepia/20 flex items-center justify-between group hover:bg-sepia/5 transition-all shadow-xl"
           >
@@ -1112,7 +1149,7 @@ function ProfileView({ setView, t, lang, setLang, darkMode, setDarkMode }: { set
       </section>
 
       <div className="pt-10 flex flex-col items-center space-y-6">
-        <button 
+        <button
           onClick={() => setView('welcome')}
           className="px-12 py-5 rounded-2xl bg-sepia/5 text-sepia font-display font-bold uppercase tracking-[0.3em] hover:bg-sepia hover:text-parchment transition-all active:scale-95 flex items-center gap-3 border border-sepia/20 shadow-lg"
         >
@@ -1132,20 +1169,20 @@ function Navigation({ setView, currentView, t }: { setView: (v: ViewState) => vo
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
+
       // Always show at the very top
       if (currentScrollY < 20) {
         setIsVisible(true);
-      } 
+      }
       // Hide when scrolling down
       else if (currentScrollY > lastScrollY && currentScrollY > 100) {
         setIsVisible(false);
-      } 
+      }
       // Show when scrolling up
       else if (currentScrollY < lastScrollY) {
         setIsVisible(true);
       }
-      
+
       setLastScrollY(currentScrollY);
     };
 
@@ -1163,7 +1200,7 @@ function Navigation({ setView, currentView, t }: { setView: (v: ViewState) => vo
   ];
 
   return (
-    <motion.nav 
+    <motion.nav
       animate={{ y: isVisible ? 0 : 100, opacity: isVisible ? 1 : 0 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50"
@@ -1209,7 +1246,7 @@ function PricingView({ setView, t }: { setView: (v: ViewState) => void, t: any, 
   ];
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
@@ -1226,7 +1263,7 @@ function PricingView({ setView, t }: { setView: (v: ViewState) => void, t: any, 
         {plans.map((plan, i) => {
           const planData = t.pricing.plans[plan.id as keyof typeof t.pricing.plans];
           return (
-            <motion.div 
+            <motion.div
               key={plan.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1243,7 +1280,7 @@ function PricingView({ setView, t }: { setView: (v: ViewState) => void, t: any, 
                   Most Popular
                 </div>
               )}
-              
+
               <div className="space-y-8">
                 <div className="flex justify-between items-start">
                   <div className="space-y-3">
@@ -1276,9 +1313,9 @@ function PricingView({ setView, t }: { setView: (v: ViewState) => void, t: any, 
           );
         })}
       </div>
-      
+
       <div className="flex justify-center pt-8">
-        <button 
+        <button
           onClick={() => setView('dashboard')}
           className="text-[10px] font-display font-bold text-sepia/40 uppercase tracking-widest hover:text-sepia transition-colors flex items-center gap-2"
         >

@@ -1,0 +1,42 @@
+1. Analitik Stratejist (The Logical Analyst)
+Karakter Yapısı: Mantıklı, detaycı, az ve öz konuşan, veriye dayalı hareket eden tip. Mesajlarında genellikle düzgün bir imla ve net bilgiler kullanır.
+
+Görsel Tip: Gözlüklü, hafifçe kalkmış tek kaş, derli toplu kıyafetler.
+
+Prompt: > "3D Disney-Pixar style character, a sleek and intellectual young man wearing stylish round glasses and a neat turtleneck. He has a sharp, focused gaze with a subtle, confident smirk. High-quality 3D render, octane render, soft studio lighting, big expressive eyes, vibrant colors, incredibly detailed textures, solid pastel background."
+
+2. Enerjik Sosyal Kelebek (The Energetic Extravert)
+Karakter Yapısı: Bolca emoji kullanan, ünlemi eksik etmeyen, hızlı ve heyecanlı yazan tip. Pozitif enerji saçar.
+
+Görsel Tip: Dağınık saçlar, kocaman bir gülümseme, dinamik bir duruş, parlak renkli kıyafetler.
+
+Prompt:
+
+"3D Disney-Pixar style character, a highly energetic girl with messy colorful hair and a wide, joyful smile. She is in a mid-action jumping pose, wearing a bright yellow hoodie. Extremely expressive face, large shining eyes, cinematic lighting, 8k resolution, stylized 3D animation look, solid turquoise background."
+
+3. Duygusal Destekçi (The Empathetic Nurturer)
+Karakter Yapısı: Yumuşak bir dil kullanan, karşısındakini onaylayan, "canım, tatlım" gibi hitapları seven, uzun ve düşünceli mesajlar yazan tip.
+
+Görsel Tip: Yumuşak hatlar, sıcak renk tonları (turuncu/pembe), şefkatli bir bakış, elleri kalbinde veya sıcak bir çay tutarken.
+
+Prompt:
+
+"3D Disney-Pixar style character, a kind-hearted young woman with soft features and warm amber eyes. She has a gentle, comforting smile and is wearing a cozy oversized knitted sweater. Warm lighting, soft-focus background, heartwarming atmosphere, detailed wool texture, high-end 3D character design, solid peach background."
+
+4. Gizemli Gözlemci (The Cautious Skeptic)
+Karakter Yapısı: Kısa cevaplar veren, genellikle "hmm, bakarız, tamam" diyen, mesafeli ama merak uyandırıcı tip. Mesajları biraz soğuk ama derin olabilir.
+
+Görsel Tip: Kapüşonlu üst, hafif gölgeli bir yüz, elleri ceplerinde, hafif mesafeli ama zeki bir bakış.
+
+Prompt:
+
+"3D Disney-Pixar style character, a mysterious boy wearing a dark navy hoodie with the hood partially up. He has a thoughtful, slightly squinted look, suggesting deep observation. Cool blue lighting, cinematic shadow play, highly detailed 3D modeling, expressive eyebrows, solid deep grey background."
+
+5. Hayalperest Vizyoner (The Dreamy Visionary)
+Karakter Yapısı: Soyut konuşan, fikirlerle dolu, bazen konudan sapan, yaratıcı ve ilham verici mesajlar atan tip.
+
+Görsel Tip: Yıldızlı veya desenli kıyafetler, yukarı doğru bakan hayal kuran gözler, etrafında hafif parıltılar veya uçuşan objeler.
+
+Prompt:
+
+"3D Disney-Pixar style character, a creative dreamer looking upwards with wonder. He has slightly messy hair and eyes full of stars and sparkles. Wearing a vest with cosmic patterns. Magical lighting, whimsical atmosphere, glowing particles, vivid colors, masterfully crafted 3D render, solid lavender background."

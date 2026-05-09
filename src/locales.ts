@@ -1,4 +1,3 @@
-
 export type Language = 'en' | 'tr';
 
 export const translations = {
@@ -66,7 +65,7 @@ export const translations = {
     insights: {
       category: "DIGITAL REFLECTION",
       headline: "Analysis for",
-      synthesisTitle: "Communication Synthesis",
+      synthesisTitle: "Actionable Insights",
       synthesis: [
         "Your communication style leans heavily towards meaningful, deep-dive conversations rather than rapid-fire exchanges. You tend to wait until you have a fully formed thought before hitting send, which contributes to the high quality of your interactions. This 'thoughtful pause' is a hallmark of an intentional communicator.",
         "Interestingly, your engagement peaks in the late evening hours, suggesting that your cognitive energy for social connection thrives when the world slows down. You often act as the 'anchor' in group chats, providing stabilizing questions that keep the dialogue moving forward without overwhelming participants with volume.",
@@ -86,17 +85,21 @@ export const translations = {
       auditSecurity: "Audit Security",
       shareToStory: "Share to Story",
       comparison: {
-        title: "Contrast Analysis",
-        subtitle: "How you compare against the other party in this conversation context.",
+        title: "Personality Metrics",
+        subtitle: "Your data distribution and ratios in this chat.",
         wordCount: "Word Output",
         responseTime: "Average Response Time",
         emojis: "Emoji Usage",
         doubleTexting: "Double Texting Rate",
         messages: "Message Count",
+        prominent: "PROMINENT",
+        receptive: "RECEPTIVE",
         metrics: {
           words: "Words",
           minutes: "Minutes",
-          emojis: "Emojis"
+          emojis: "Emojis",
+          times: "Times",
+          msg: "Msg"
         }
       }
     },
@@ -221,7 +224,7 @@ export const translations = {
     insights: {
       category: "DİJİTAL YANSIMA",
       headline: "Analiz Sahibi:",
-      synthesisTitle: "İletişim Sentezi",
+      synthesisTitle: "İletişim Rehberi",
       synthesis: [
         "İletişim tarzınız, hızlı alışverişlerden ziyade anlamlı ve derinlemesine konuşmalara ağırlık veriyor. Göndermeden önce düşüncelerinizi tam olarak şekillendirmeyi tercih ediyorsunuz, bu da etkileşimlerinizin yüksek kalitesine katkıda bulunuyor. Bu 'düşünceli duraklama', bilinçli bir iletişimcinin imzasıdır.",
         "İlginç bir şekilde, etkileşiminiz akşam geç saatlerde zirveye ulaşıyor; bu da sosyal bağlantı için bilişsel enerjinizin dünya yavaşladığında geliştiğini gösteriyor. Genelde grup sohbetlerinde, katılımcıları hacimle boğmadan diyaloğu ilerleten dengeleyici sorular soran bir 'demir' görevi görüyorsunuz.",
@@ -241,17 +244,21 @@ export const translations = {
       auditSecurity: "Güvenliği Denetle",
       shareToStory: "Hikayede Paylaş",
       comparison: {
-        title: "Kontrast Analizi",
-        subtitle: "Bu sohbet bağlamında diğer tarafla nasıl kıyaslandığınız.",
+        title: "Kişilik Metrikleri",
+        subtitle: "Sohbetteki veri dağılımınız ve oranlarınız.",
         wordCount: "Kelime Üretimi",
         responseTime: "Ortalama Yanıt Süresi",
         emojis: "Emoji Kullanımı",
         doubleTexting: "Üst Üste Mesaj",
         messages: "Mesaj Sayısı",
+        prominent: "BASKIN",
+        receptive: "ALICI",
         metrics: {
           words: "Kelime",
           minutes: "Dakika",
-          emojis: "Emoji"
+          emojis: "Emoji",
+          times: "Kere",
+          msg: "Msj"
         }
       }
     },
